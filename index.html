@@ -57,6 +57,15 @@ dialog{color:var(--ink);background:var(--paper);width:min(600px,calc(100vw - 28p
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 .hot:focus-visible{outline:none}.hot:focus-visible .hitring{stroke:var(--coral);stroke-width:3}
 @media(max-width:470px){.hero h1 br{display:block}.hero h1 span{margin-left:0}.chapter-heading h1{font-size:28px}}
+#language-link{color:var(--teal);font-size:13px;text-underline-offset:.25em;white-space:nowrap;padding:6px 0}
+#language-link:hover{color:var(--coral)}
+html[lang="en"] .brand{letter-spacing:0}
+html[lang="en"] .hero h1{font-size:clamp(35px,4.3vw,74px);line-height:1.06;letter-spacing:-.052em}
+html[lang="en"] .hero p,html[lang="en"] .notes p{line-height:1.65}
+html[lang="en"] .section-head small{max-width:18em;text-align:right}
+@media(max-width:720px){#language-link{font-size:12px}html[lang="en"] .hero h1{font-size:clamp(40px,8vw,54px)}html[lang="en"] .hero h1 br{display:block}html[lang="en"] .hero h1 span{margin-left:0}}
+@media(max-width:470px){html[lang="en"] .section-head{flex-direction:column;align-items:flex-start;gap:2px}html[lang="en"] .section-head small{max-width:none;text-align:left}}
+@media(max-width:350px){.mast nav{gap:9px}.mast nav button{white-space:nowrap}.brand{font-size:16px;gap:6px;letter-spacing:.03em}.seal{width:29px;height:29px}}
 </style>
 <!-- Embedded Noto Serif SC and Noto Sans SC font licenses
 Copyright 2012 Google Inc. All Rights Reserved.
@@ -252,36 +261,198 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 <header class="wrap mast">
   <a class="brand" href="#atlas" aria-label="递归自改进图鉴首页">
     <svg class="seal" viewBox="0 0 44 44" aria-hidden="true"><rect x="1.5" y="1.5" width="41" height="41" rx="11" fill="#20574d"/><g fill="none" stroke="#f3ebcd" stroke-width="2.2"><path d="M12 16c5-8 17-9 22-1m-5-1 6 2-1-6M32 28c-5 8-17 9-22 1m5 1-6-2 1 6"/><path d="m15 24 6 4 8-5-6-4z"/></g></svg>
-    递归自改进图鉴
+    <span id="brand-name">递归自改进图鉴</span>
   </a>
-  <nav aria-label="页面工具"><button id="sources-button"><svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M1.7 3.8c3.3-.9 6.1-.6 8.2 1.1 2.3-1.7 5.2-2 8.4-1.1v11.7c-3.3-.9-6.1-.6-8.4 1.1-2.2-1.7-5.1-2-8.2-1.1zM9.9 4.9v11.7"/></svg>研究来源</button></nav>
+  <nav id="site-tools" aria-label="页面工具"><a id="language-link" href="?lang=en" hreflang="en"><span lang="en">English</span></a><button id="sources-button"><svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M1.7 3.8c3.3-.9 6.1-.6 8.2 1.1 2.3-1.7 5.2-2 8.4-1.1v11.7c-3.3-.9-6.1-.6-8.4 1.1-2.2-1.7-5.1-2-8.2-1.1zM9.9 4.9v11.7"/></svg><span id="sources-label">研究来源</span></button></nav>
 </header>
 <main class="wrap" id="main" tabindex="-1"></main>
-<div class="wrap foot"><span>递归自改进图鉴</span><span lang="en">RSI Atlas</span></div>
-<dialog id="sources" aria-labelledby="source-title"><div class="dialog-top"><h2 id="source-title">研究来源</h2><button class="quiet" id="close-sources">关闭</button></div><p>图鉴采用《Understanding RSI》的分类，并用分拣站演示其中的区别。站内包裹和成绩均来自教学规则。</p><ul id="source-list"></ul></dialog>
+<div class="wrap foot"><span id="foot-name">递归自改进图鉴</span><span lang="en">RSI Atlas</span></div>
+<dialog id="sources" aria-labelledby="source-title"><div class="dialog-top"><h2 id="source-title">研究来源</h2><button class="quiet" id="close-sources">关闭</button></div><p id="sources-intro">图鉴采用《Understanding RSI》的分类，并用分拣站演示其中的区别。站内包裹和成绩均来自教学规则。</p><ul id="source-list"></ul></dialog>
 <div class="sr" id="announcement" role="status" aria-live="polite"></div>
-<noscript>请启用 JavaScript 来操作图鉴。RSI 指系统从任务反馈中改变自身，并把改变带入下一轮。研究者还会单独检验改进方法本身能否变好。</noscript>
+<noscript><div class="wrap"><p lang="zh-CN">请启用 JavaScript 来操作图鉴。RSI 指系统从任务反馈中改变自身，并把改变带入下一轮。研究者还会单独检验改进方法本身能否变好。</p><p lang="en">Enable JavaScript to explore the atlas. In recursive self-improvement, a system changes how it handles later tasks. A stronger test asks whether it also improves the way it makes those changes.</p></div></noscript>
 <script>
 'use strict';
-const chapters = [
-  {id:'loop', short:'反馈', name:'一次错误，怎样留下来？', nav:'沿着反馈走', note:'追踪一个走错路线的包裹', intro:'看一枚方章怎样从投递记录，变成下一批包裹也能使用的规则。', refs:['guide']},
-  {id:'parts', short:'部件', name:'AI 究竟改了哪里？', nav:'拆开系统', note:'查看五种可以改变的部件', intro:'同一条经验可以写进不同地方。拆开分拣机，看看下一批包裹怎样用到它。', refs:['guide','seal','memory']},
-  {id:'updates', short:'更新', name:'谁来改，什么时候改？', nav:'安排一次更新', note:'决定谁交接，以及何时换版', intro:'选择负责更新的人，再选择换版时机。两项决定会改变不同的事情。', refs:['guide']},
-  {id:'versions', short:'版本', name:'版本一定排成一条线吗？', nav:'追溯版本', note:'沿着链、树和图追踪来路', intro:'给旧版留下分支，就能继续探索另一种改法。点一个版本查看它从哪里来。', refs:['guide','dgm']},
-  {id:'tests', short:'检验', name:'旧题满分，就算变强了吗？', nav:'换一批包裹', note:'检验一条表面有效的规则', intro:'只有封签形状决定目的地。换掉纸箱颜色，看两条原本同分的规则还能不能用。', refs:['guide','survey']},
-  {id:'improver', short:'递归', name:'改进器自己变好了吗？', nav:'检验改进器', note:'在同一起点比较两套改法', intro:'把负责挑选新规则的工序也当成可以修改的部件，再让它去改进另一台分拣机。', refs:['stop','survey']},
+const route = [
+  {id:'loop', refs:['guide']}, {id:'parts', refs:['guide','seal','memory']},
+  {id:'updates', refs:['guide']}, {id:'versions', refs:['guide','dgm']},
+  {id:'tests', refs:['guide','survey']}, {id:'improver', refs:['stop','survey']},
 ];
+const layerColors=['#d3c6a0','#9ab69b','#cfb077','#84aba5','#d2a58a'];
 const sources = {
-  guide:['Understanding RSI','https://prism-shadow.github.io/awesome-rsi/blog/understanding-rsi/','领域定义、五类部件、更新者、时机和版本关系'],
-  survey:['Towards AI That Improves Itself','https://lee1003-lee.github.io/Awesome-RSI-Research/','怎样区分局部修复、跨任务改进与更强的递归证据'],
-  seal:['Self-Adapting Language Models（SEAL）','https://arxiv.org/abs/2506.10943','模型生成训练用的自编辑，再更新参数'],
-  memory:['ReasoningBank','https://arxiv.org/abs/2509.25140','从任务经验中提炼可检索的推理记忆'],
-  dgm:['Darwin Gödel Machine','https://arxiv.org/abs/2505.22954','保留多个候选智能体并从档案中继续探索'],
-  stop:['Self-Taught Optimizer（STOP）','https://arxiv.org/abs/2310.02304','把改进程序用在改进程序自身'],
+  guide:['Understanding RSI','https://prism-shadow.github.io/awesome-rsi/blog/understanding-rsi/'],
+  survey:['Towards AI That Improves Itself','https://lee1003-lee.github.io/Awesome-RSI-Research/'],
+  seal:['Self-Adapting Language Models (SEAL)','https://arxiv.org/abs/2506.10943'],
+  memory:['ReasoningBank','https://arxiv.org/abs/2509.25140'],
+  dgm:['Darwin Gödel Machine','https://arxiv.org/abs/2505.22954'],
+  stop:['Self-Taught Optimizer (STOP)','https://arxiv.org/abs/2310.02304'],
+};
+const translations = {
+  'zh-CN': {
+    chapters:[
+      {short:'反馈', name:'一次错误，怎样留下来？', nav:'沿着反馈走', note:'追踪一个走错路线的包裹', intro:'看一枚方章怎样从投递记录，变成下一批包裹也能使用的规则。'},
+      {short:'部件', name:'AI 究竟改了哪里？', nav:'拆开系统', note:'查看五种可以改变的部件', intro:'同一条经验可以写进不同地方。拆开分拣机，看看下一批包裹怎样用到它。'},
+      {short:'更新', name:'谁来改，什么时候改？', nav:'安排一次更新', note:'决定谁交接，以及何时换版', intro:'选择负责更新的人，再选择换版时机。两项决定会改变不同的事情。'},
+      {short:'版本', name:'版本一定排成一条线吗？', nav:'追溯版本', note:'沿着链、树和图追踪来路', intro:'给旧版留下分支，就能继续探索另一种改法。点一个版本查看它从哪里来。'},
+      {short:'检验', name:'旧题满分，就算变强了吗？', nav:'换一批包裹', note:'检验一条表面有效的规则', intro:'只有封签形状决定目的地。换掉纸箱颜色，看两条原本同分的规则还能不能用。'},
+      {short:'递归', name:'改进器自己变好了吗？', nav:'检验改进器', note:'在同一起点比较两套改法', intro:'把负责挑选新规则的工序也当成可以修改的部件，再让它去改进另一台分拣机。'},
+    ],
+    sourceNotes:{
+      guide:'领域定义、五类部件、更新者、时机和版本关系',
+      survey:'怎样区分局部修复、跨任务改进与更强的递归证据',
+      seal:'模型生成训练用的自编辑，再更新参数',
+      memory:'从任务经验中提炼可检索的推理记忆',
+      dgm:'保留多个候选智能体并从档案中继续探索',
+      stop:'把改进程序用在改进程序自身',
+    },
+    loopTitles:['发现误投','提出改法','换箱复测','保存规则','再收一件'],
+    loopDetails:[
+      ['方章包裹进了南库','站里原本按箱色分拣。这个土黄色纸箱盖的是方章，按投递单应该去北库。','旧规则按箱色分拣'],
+      ['把猜想写成候选规则','系统对照投递单，提出“先看封签形状”。候选规则先留在试验台上。','候选规则已经提出，运行中的版本仍是 v1'],
+      ['用另一种箱色试一次','橄榄色纸箱上也盖着方章。候选规则把它送到北库，与投递单一致。','这次复测通过。第五站会用整批新题继续检验'],
+      ['把改法写回分拣机','复测通过后才装上识别封签的规则模块。下一件包裹会由 v2 处理。','已保存的改变：分拣依据由箱色变成封签'],
+      ['新版本接手下一件','下一只箱子换回土黄色，仍盖着方章。v2 读取保存的规则，把它送到北库。','一条反馈走完了从任务结果到后续任务的路'],
+    ],
+    layers:[
+      {name:'上下文',tag:'眼前的任务单',detail:'把“先看封签”放进下一次调用的任务单，模型当场看得见。后续是否继续可见，取决于任务单怎样保留。',example:'下一次调用收到的文字变了。'},
+      {name:'记忆',tag:'可检索的档案',detail:'把误投和正确做法记入档案。收到相似包裹时，先检索这条经验，再放进当前任务单。',example:'长期存放经验，取出后才成为上下文。'},
+      {name:'技能',tag:'可复用的工序',detail:'把检查封签、查目的地、核对投递单写成可重复调用的步骤。新包裹可以直接使用这套工序。',example:'改变的是处理一类任务时复用的做法。'},
+      {name:'工具与流程',tag:'传感器与控制器',detail:'为机器接入封签扫描器，并让控制器在分流前调用它。这里的 harness 指组织模型怎样工作的一套外部程序。',example:'系统多了一个可调用的动作，执行顺序也变了。'},
+      {name:'模型参数',tag:'识别器内部',detail:'用带正确目的地的样本训练模型，把辨认封签的能力写进权重。新输入到来时，模型自身的响应发生变化。',example:'SEAL 研究了让模型生成自编辑并据此更新权重。'},
+    ],
+    authors:['自己更新','教师更新','共同更新'],
+    timings:['在线','离线','混合'],
+    forms:['链','树','图'],
+    batchNames:['熟悉批次','交换箱色','换新封签'],
+    chapterNotes:[
+      '《Understanding RSI》采用较宽的口径：环境给出反馈，更新机制改变系统状态，新状态参与后续任务。评估时还要检查改变是否有效。更新者可以是系统自己，也可以是外部教师。',
+      '研究常把智能体拆成模型与组织其工作的外部系统。上下文、记忆、技能、工具和流程可能同时变化。SEAL 和 ReasoningBank 分别给出了参数更新与经验记忆的实际研究例子。',
+      '更新者和更新时机是两条独立的分类轴。教师可以是人、模型或外部训练程序。这里的混合方案在线记经验、离线换规则，是混合更新的一种实现。',
+      '点代表可区分的系统版本，线代表继承或组合关系。这里用“两支合并”演示图结构。Darwin Gödel Machine 的档案展示了为什么保留多个分支有助于继续探索。',
+      '训练样本、筛选候选规则的验证样本，以及最后报告成绩的独立测试承担不同职责。换任务、重复试验、控制成本和基线，是把“这里有效”推广到更多场景所需要的证据。',
+      'STOP 把一个代码改进程序应用于它自身。可以改变改进器的外部代码，而不更新基础语言模型的权重。本实验只检验一个挑选规则的工序；普遍的自我加速还需要跨任务、跨轮次和等资源对照的证据。',
+    ],
+    authorDetails:['分拣机自己从误投中提出并写入新规则。','外部教师复核投递记录，再把新规则交回分拣机。','分拣机提出候选规则，教师复核后一起完成更新。'],
+    timingResults:['从第二件起使用 v2，更新发生在批次内。','这一批仍由 v1 分拣。批末验证并换版，下一批使用 v2。','第一件后在线记入经验，批末统一验证换版，下一批使用 v2。'],
+    versionDetails:['每次换版都从刚刚使用的版本继续，来路只有一条。','同一版本可以衍生出多种改法。保留分支，之后还能回到另一条路上继续试。','两个分支可以把各自的发现交给同一个新版。这里展示的是图结构中的合并。'],
+    testTitles:['两条规则都满分','交换一个线索','规则遇到边界'],
+    testDetails:['方章恰好全在橄榄色箱上，圆章全在土黄色箱上。两条规则都能解释这批成绩。','形状和目的地都没变，只把箱色交换了。旧批次隐藏的差别现在逐件可见。','新站改用菱章和三角章。旧封签表没有条目，系统需要新信息；所有待核对件都不计作投对。'],
+    improverTitles:['先比较两条候选规则','改的是挑选规则的办法','把两套挑选器给新站','比较下一轮的改进能力'],
+    improverInfo:['旧工序总挑两个熟悉样本。看箱色和看封签都投对时，就按约定选排在前面的箱色规则。','系统从上一站的误投中修改挑选工序：保留两个样本的预算，让其中一个样本的箱色和封签给出相反线索。','新站使用菱章和三角章。两套挑选器各拿到两条候选规则和两个名额，按各自方法取样、评分、选出规则。','两套挑选器面对同一新任务、预算相同，所选规则在独立测试上的表现不同。这支持本例的挑选方法变好，证据范围只到这个玩具任务。'],
+    improverRead:['当前被测试的是“怎样选规则”这一层。','改变已经写入挑选器，下一个站可以继承。','新站的验证集与最终测试分别收件，重复的颜色和形状只是包裹类别。'],
+    figureNames:['封签扫描与分流口','分拣机剖面','规则交接台','分拣机版本谱系','逐件投递记录','挑选器对照台'],
+    hints:['按“下一步”追踪规则','点击部件或名称查看','改变两项设置，再运行一批','点击版本，追踪继承关系','切换批次，对照每件结果','两边的试验预算始终相同'],
+  },
+  en: {
+    chapters: [
+      {short:'Feedback', name:'How does one mistake change the next delivery?', nav:'Follow the feedback', note:'Trace a parcel that went the wrong way.', intro:'Follow a square stamp from a delivery slip into a rule the sorter can use on the next batch.'},
+      {short:'Parts', name:'What part of an AI system changes?', nav:'Take the sorter apart', note:'Explore five places a change can live.', intro:'One lesson can be stored in different places. Open the sorter to see how each part could put that lesson to work.'},
+      {short:'Updates', name:'Who makes the update, and when?', nav:'Schedule an update', note:'Choose who writes the rule and when it takes effect.', intro:'Choose who updates the rule, then choose when the sorter switches versions. Run a batch to see what each choice changes.'},
+      {short:'Versions', name:'Do versions always form a chain?', nav:'Trace a version', note:'Follow changes through a chain, a tree, or a graph.', intro:'Keeping an old version lets you try a different change from the same starting point. Select a version to see where it came from.'},
+      {short:'Tests', name:'What does a perfect score on familiar parcels tell us?', nav:'Test the rule', note:'Find out when a perfect score breaks down.', intro:'Only the stamp shape determines a parcel’s destination. Swap the box colors and see whether two rules that once tied still work.'},
+      {short:'Recursion', name:'Can the rule picker itself improve?', nav:'Test the improver', note:'Compare two ways of choosing the next rule.', intro:'The sorter has a procedure for choosing better rules. Change that procedure, then see which rule it picks for a new sorting station.'},
+    ],
+    sourceNotes: {
+      guide:'Definitions, five parts that can change, who updates them, update timing, and version histories.',
+      survey:'Evidence for local fixes, improvements that transfer across tasks, and recursive improvement.',
+      seal:'A model generates its own training edits and uses them to update its weights.',
+      memory:'An agent distills experience into reasoning strategies it can retrieve on future tasks.',
+      dgm:'An archive keeps multiple candidate agents available for further exploration.',
+      stop:'A program for improving code applies its improvement procedure to its own code.',
+    },
+    loopTitles:['Spot the error','Propose a rule','Retest','Save the rule','Sort again'],
+    loopDetails:[
+      ['A square stamp goes south','The sorter uses box color. It sends this tan box south, but the delivery slip says a square stamp belongs in the north bin.','Version 1 sorts by box color.'],
+      ['Try a rule based on the stamp','After checking the slip, the system proposes reading the stamp shape first. The candidate stays on the test bench for now.','The candidate is ready. Version 1 is still sorting parcels.'],
+      ['Try a box of a different color','This olive box also has a square stamp. The candidate rule sends it north, as the delivery slip requires.','This parcel passes. At stop 5 you can try whole batches of unfamiliar parcels.'],
+      ['Install the new rule','After the check passes, the sorter installs the stamp rule. Version 2 will handle the next parcel.','The saved rule now reads the stamp shape.'],
+      ['The next parcel uses version 2','Another tan box arrives with a square stamp. Version 2 reads the saved rule and routes it north.','Feedback from one delivery has changed how a later delivery is handled.'],
+    ],
+    layers:[
+      {name:'Context', tag:'The current task sheet', detail:'Add “check the stamp first” to the instructions for the next model call. Whether a later call sees the instruction depends on how the task sheet is carried forward.', example:'The text the model receives on its next call has changed.'},
+      {name:'Memory', tag:'A searchable archive', detail:'File the failed delivery and its correction in an archive. When a similar parcel arrives, the system retrieves the lesson and adds it to the current task sheet.', example:'A stored memory becomes context when the system retrieves it.'},
+      {name:'Skills', tag:'A reusable procedure', detail:'Turn “read the stamp, look up the destination, check the slip” into a procedure the sorter can call again for a new parcel.', example:'The system has changed how it handles a whole class of tasks.'},
+      {name:'Tools & workflow', tag:'Sensors and a controller', detail:'Add a stamp scanner and have the controller call it before routing a parcel. Researchers call the external software that organizes a model’s work its harness.', example:'The sorter has a new action and a new point in its workflow to use it.'},
+      {name:'Model weights', tag:'Inside the recognizer', detail:'Train the model on parcels labeled with their correct destinations. This changes its weights, so the model responds differently when a new parcel arrives.', example:'In SEAL, the model generates training edits that are then used to update its weights.'},
+    ],
+    authors:['Sorter','Teacher','Both'], timings:['Online','Offline','Hybrid'], forms:['Chain','Tree','Graph'],
+    batchNames:['Familiar batch','Swap colors','New stamps'],
+    chapterNotes:[
+      'Understanding RSI uses a broad definition. Feedback from the environment triggers an update to the system, and the updated system takes part in later tasks. The updater may be the system or an external teacher. Whether the update helps is a separate empirical question.',
+      'Researchers often distinguish the model from the software that organizes its work. Context, memory, skills, tools, and workflow can change together. SEAL studies weight updates. ReasoningBank studies memories distilled from experience.',
+      'Who performs an update and when it takes effect are independent choices. A teacher can be a person, another model, or a training program. This hybrid example records experience online and changes the rule offline at the end of the batch.',
+      'Nodes represent distinct versions. Arrows show where changes were inherited or combined. The graph here shows two branches merging. The Darwin Gödel Machine illustrates a related idea by keeping an archive of agents from which new branches can be explored.',
+      'Training examples teach a rule. Validation examples help choose among candidate rules. A separate test set measures the result. Evidence that a change transfers requires new tasks, repeated trials, and comparisons with a baseline at a matched cost.',
+      'STOP applies a code-improvement program to its own code. The outer program can change while the underlying language model’s weights stay fixed. Our experiment measures one rule-picking procedure on one toy task. Evidence for general self-acceleration would require multiple tasks, successive rounds, and matched resources.',
+    ],
+    authorDetails:[
+      'The sorter learns from a misdelivery, proposes a new rule, and installs it itself.',
+      'An external teacher reviews the delivery log and hands a new rule back to the sorter.',
+      'The sorter proposes a candidate. The teacher checks it, and together they complete the update.',
+    ],
+    timingResults:[
+      'Version 2 takes over from the second parcel. The update happens during the batch.',
+      'Version 1 sorts this entire batch. The sorter validates and switches rules at the end, so the next batch uses version 2.',
+      'The sorter logs experience after the first parcel. It checks and installs the new rule at batch end, ready for the next batch.',
+    ],
+    versionDetails:[
+      'Each version builds on the one just before it. There is one path back to the start.',
+      'One version can give rise to several alternatives. Keeping the branches lets you return to another one and try a different change.',
+      'Two branches can contribute their changes to one new version. Select the merged node to see both parents.',
+    ],
+    testTitles:['Two perfect scores','Swap just one clue','The old lookup table runs out'],
+    testDetails:[
+      'Every square stamp happens to be on an olive box, and every round stamp is on a tan one. Either rule fits these deliveries.',
+      'The stamps and destinations stay the same. Only the box colors swap. You can now see the difference between the two rules on every parcel.',
+      'The new station uses diamonds and triangles. The old stamp table has no entries for them. These parcels need more information and earn no credit for a correct delivery.',
+    ],
+    improverTitles:['Start with two candidate rules','Change how the picker chooses','Give both pickers a new station','Measure the next round of improvement'],
+    improverInfo:[
+      'The original picker always checks two familiar parcels. When box color and stamp shape both score perfectly, its tie-break picks the color rule first.',
+      'After seeing the earlier misdeliveries, the system changes its sampling procedure. It still checks two parcels, but one now gives conflicting clues from color and stamp.',
+      'The new station uses diamonds and triangles. Each picker gets two candidate rules and two validation parcels. Its own sampling procedure determines which parcels it checks before it chooses a rule.',
+      'With the same new task and the same budget, the two pickers choose rules that score differently on a separate test. The revised picker improved rule selection for this toy task.',
+    ],
+    improverRead:[
+      'The experiment now tests the procedure for choosing a rule.',
+      'The revised procedure is saved. The next station can inherit it.',
+      'The validation and final test use separate deliveries. Colors and stamp shapes recur because they describe types of parcel.',
+    ],
+    figureNames:['Stamp scanner and sorting gate','Inside the sorter','Rule handoff','Version history','Parcel-by-parcel results','Rule pickers compared'],
+    hints:['Choose “Next step” to follow the rule.','Select a part or its label.','Choose an updater and timing, then run a batch.','Select a version to trace its parents.','Switch batches to compare individual deliveries.','Each picker gets the same testing budget.'],
+  },
 };
 const $$=id=>document.getElementById(id);
 function sourceLink(key){const [title,url]=sources[key];return `<a href="${url}" target="_blank" rel="noreferrer">${title} ↗</a>`;}
-$$('source-list').innerHTML=Object.keys(sources).map(key=>`<li>${sourceLink(key)}<br><small>${sources[key][2]}</small></li>`).join('');
+let language, copy, chapters;
+function urlLanguage(){return new URL(location.href).searchParams.get('lang')==='en'?'en':'zh-CN';}
+function text(zh,en){return language==='en'?en:zh;}
+function otherLanguage(){return language==='en'?'zh-CN':'en';}
+function updateLanguageLink(){
+  const link=$$('language-link'), next=otherLanguage(), url=new URL(location.href);
+  url.searchParams.set('lang',next==='en'?'en':'zh');
+  link.href=url.href;
+  link.hreflang=next;
+  link.firstElementChild.lang=next;
+  link.firstElementChild.textContent=text('English','中文');
+  link.setAttribute('aria-label',text('切换到英文版 · English','Switch to Chinese · 中文'));
+}
+function setLanguage(next){
+  language=next;
+  document.documentElement.lang=language;
+  copy=translations[language];
+  chapters=route.map((stop,i)=>({...stop,...copy.chapters[i]}));
+  $$('brand-name').textContent=text('递归自改进图鉴','RSI Atlas');
+  $$('brand-name').parentElement.setAttribute('aria-label',text('递归自改进图鉴首页','RSI Atlas home'));
+  $$('site-tools').setAttribute('aria-label',text('页面工具','Site tools'));
+  $$('foot-name').textContent=text('递归自改进图鉴','Recursive Self-Improvement');
+  const heading=text('研究来源','Research sources');
+  $$('source-title').textContent=heading;
+  $$('sources-label').textContent=heading;
+  $$('close-sources').textContent=text('关闭','Close');
+  $$('sources-intro').textContent=text('图鉴采用《Understanding RSI》的分类，并用分拣站演示其中的区别。站内包裹和成绩均来自教学规则。','This atlas uses the categories from Understanding RSI. The parcels and scores come from the sorting rules in these teaching experiments.');
+  $$('source-list').innerHTML=Object.keys(sources).map(key=>`<li>${sourceLink(key)}<br><small>${copy.sourceNotes[key]}</small></li>`).join('');
+  $$('announcement').textContent='';
+}
 $$('sources-button').addEventListener('click',()=>$$('sources').showModal());
 $$('close-sources').addEventListener('click',()=>$$('sources').close());
 $$('sources').addEventListener('click',e=>{if(e.target===$$('sources')){const box=e.target.getBoundingClientRect();if(e.clientX<box.left||e.clientX>box.right||e.clientY<box.top||e.clientY>box.bottom)e.target.close();}});
@@ -325,23 +496,23 @@ function atlasMap(){
   const fills=['#d9dec4','#c7d8bb','#e1d9ba','#ddc9a7','#cedab9','#dad7b5'];
   const edges=mapIslands.map((d,i)=>path(d,'none','#b9c9b9',14)+path(d,'none','#f0efdb',8)+path(d,fills[i],'#7e8d75',1.5)
     +`<g clip-path="url(#coast${i})">`+Array.from({length:4},(_,j)=>`<path d="${d}" transform="translate(${(j+1)*4+3} ${(j+1)*4+2})" fill="none" stroke="#9eaa8c" stroke-width=".85" opacity=".6"/>`).join('')+'</g>').join('');
-  const stops=mapStops.map(([x,y],i)=>{const c=chapters[i];return `<a href="#${c.id}" class="map-stop" aria-label="第 ${i+1} 站，${c.nav}"><title>${c.name}</title>${g(x,y, `<g class="pin"><circle cy="-1" r="7.5" fill="${i===0?coral:teal}" stroke="#f6f1d8" stroke-width="2.8"/><circle cy="-1" r="2.1" fill="#f6f1d8"/></g><rect x="-41" y="9" width="82" height="22" rx="5" fill="#f4f0dc" fill-opacity=".94"/>${txt(0,25,`${i+1} · ${c.short}`,15,ink,'middle','class="map-label" font-weight="650"')}`)}</a>`;}).join('');
+  const stops=mapStops.map(([x,y],i)=>{const c=chapters[i];return `<a href="#${c.id}" class="map-stop" aria-label="${text(`第 ${i+1} 站，${c.nav}`,`Stop ${i+1}: ${c.nav}`)}"><title>${c.name}</title>${g(x,y, `<g class="pin"><circle cy="-1" r="7.5" fill="${i===0?coral:teal}" stroke="#f6f1d8" stroke-width="2.8"/><circle cy="-1" r="2.1" fill="#f6f1d8"/></g><rect x="${language==='en'?-53:-41}" y="9" width="${language==='en'?106:82}" height="22" rx="5" fill="#f4f0dc" fill-opacity=".94"/>${txt(0,25,`${i+1} · ${c.short}`,15,ink,'middle','class="map-label" font-weight="650"')}`)}</a>`;}).join('');
   const seaLines=Array.from({length:48},(_,i)=>{const x=20+((i*107)%668),y=25+((i*67)%308);return g(x,y,path('M-7 0 q3 -3 6 0 t6 0','none','#9eb7b0',.8));}).join('');
   const compass=g(649,58,`<circle r="19" stroke="#85978d" fill="none" stroke-width=".8"/><circle r="15" stroke="#b1ba9c" fill="none" stroke-width=".7"/>${path('M0 -27 4 -3 25 0 4 4 0 25 -4 4 -24 0 -4 -3Z','#eff1db','#6c7e71',1)}${path('M0 -24 0 0 -3 -3Z M0 0 21 0 3 3Z','#557467','#6c7e71',.5)}${txt(0,-32,'N',9,'#5f7569')}`);
   const boat=g(260,260,path('M-11 0 13 -2 8 4 -6 5Z','#b99f70','#7c826d',.8)+path('M0 -18 0 -3 -9 -2Z','#faf1d2','#808974',.8)+path('M2 -15 9 -4 2 -3Z','#e1d8aa','#808974',.8));
-  return `<svg viewBox="0 0 720 370" role="group" aria-label="六站可点击的 RSI 研究路线地图"><defs><pattern id="seaGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#a8b8a6" stroke-width=".5" opacity=".54"/></pattern>${mapIslands.map((d,i)=>`<clipPath id="coast${i}"><path d="${d}"/></clipPath>`).join('')}</defs>
+  return `<svg viewBox="0 0 720 370" role="group" aria-label="${text('六站可点击的 RSI 研究路线地图','Interactive map of the six RSI experiments')}"><defs><pattern id="seaGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#a8b8a6" stroke-width=".5" opacity=".54"/></pattern>${mapIslands.map((d,i)=>`<clipPath id="coast${i}"><path d="${d}"/></clipPath>`).join('')}</defs>
     <rect width="720" height="370" fill="#dfe9df"/><rect width="720" height="370" fill="url(#seaGrid)"/>${seaLines}
     <g fill="none" stroke="#b4c6b8" stroke-width="1">${[0,1,2,3].map(i=>`<path d="M${-60+i*11} 325 Q70 317 122 345 T283 352 M390 ${-24+i*5} Q516 ${36+i*4} 610 11 T755 34"/>`).join('')}</g>
     ${edges}${terrain()}${boat}${compass}
     ${path('M117 262 C88 207 185 200 221 143 S299 60 355 91 S464 84 509 137 S652 188 602 250 S491 341 424 298','none','#fff6df',5)}
     ${path('M117 262 C88 207 185 200 221 143 S299 60 355 91 S464 84 509 137 S652 188 602 250 S491 341 424 298','none','#ab6849',2,'class="map-route"')}
-    ${txt(354,198,'反馈海',24,'#66847e','middle','font-family="serif" letter-spacing="7"')}${txt(351,215,'FEEDBACK SEA',8,'#6d8882','middle','letter-spacing="2.3"')}
+    ${txt(354,198,text('反馈海','Feedback Sea'),24,'#66847e','middle',`font-family="serif" letter-spacing="${text('7','1.4')}"`)}${language==='zh-CN'?txt(351,215,'FEEDBACK SEA',8,'#6d8882','middle','letter-spacing="2.3"'):''}
     ${stops}${path('M22 34 V20 H38 M684 20 H698 V34 M698 336 V350 H683 M38 350 H22 V336','none','#96a696',1.2)}
   </svg>`;
 }
 function overview(){
-  return `<div class="hero"><div class="hero-copy"><div class="term" lang="en">Recursive self-improvement</div><h1>AI 怎样学会<br><span>改进自己？</span></h1><p>跟着一个走错路线的包裹，看看 AI 怎样把一次失败带进下一轮，以及科学家怎样检验它有没有变得更会学习。</p><a class="primary" href="#loop">从第一站开始 <span class="arr">→</span></a></div><div class="map-panel">${atlasMap()}<div class="map-foot"><span><i class="dot"></i>点击站点进入实验</span><span><i class="dash"></i>阅读路线</span></div></div></div>
-  <section class="spreads"><div class="section-head"><h2>沿途的六个问题</h2><small>可按顺序，也可从任一站进入</small></div><div class="chapter-grid">${chapters.map((c,i)=>`<a class="chapter-card" href="#${c.id}"><svg viewBox="-36 -30 72 60" class="card-icon" aria-hidden="true">${icon(c.id)}</svg><div class="card-copy"><div class="numline"><span class="number">0${i+1}</span><h3>${c.nav}</h3></div><p>${c.note}</p></div></a>`).join('')}</div></section>`;
+  return `<div class="hero"><div class="hero-copy"><div class="term" lang="en">Recursive self-improvement</div><h1>${text('AI 怎样学会','How can AI')}<br><span>${text('改进自己？','improve itself?')}</span></h1><p>${text('跟着一个走错路线的包裹，看看 AI 怎样把一次失败带进下一轮，以及科学家怎样检验它有没有变得更会学习。','Follow a misrouted parcel from one delivery to the next. Then test a deeper question: can AI get better at the very process it uses to improve?')}</p><a class="primary" href="#loop">${text('从第一站开始','Start at the sorter')} <span class="arr">→</span></a></div><div class="map-panel">${atlasMap()}<div class="map-foot"><span><i class="dot"></i>${text('点击站点进入实验','Select a stop to explore')}</span><span><i class="dash"></i>${text('阅读路线','Reading route')}</span></div></div></div>
+  <section class="spreads"><div class="section-head"><h2>${text('沿途的六个问题','Six questions to explore')}</h2><small>${text('可按顺序，也可从任一站进入','Follow the route or pick any stop.')}</small></div><div class="chapter-grid">${chapters.map((c,i)=>`<a class="chapter-card" href="#${c.id}"><svg viewBox="-36 -30 72 60" class="card-icon" aria-hidden="true">${icon(c.id)}</svg><div class="card-copy"><div class="numline"><span class="number">0${i+1}</span><h3>${c.nav}</h3></div><p>${c.note}</p></div></a>`).join('')}</div></section>`;
 }
 /* Chapter plates */
 const model = {
@@ -350,32 +521,6 @@ const model = {
 };
 let active=-1, timer=null, zoomed=false;
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-const loopTitles=['发现误投','提出改法','换箱复测','保存规则','再收一件'];
-const loopDetails=[
-  ['方章包裹进了南库','站里原本按箱色分拣。这个土黄色纸箱盖的是方章，按投递单应该去北库。','旧规则按箱色分拣'],
-  ['把猜想写成候选规则','系统对照投递单，提出“先看封签形状”。候选规则先留在试验台上。','候选规则已经提出，运行中的版本仍是 v1'],
-  ['用另一种箱色试一次','橄榄色纸箱上也盖着方章。候选规则把它送到北库，与投递单一致。','这次复测通过。第五站会用整批新题继续检验'],
-  ['把改法写回分拣机','复测通过后才装上识别封签的规则模块。下一件包裹会由 v2 处理。','已保存的改变：分拣依据由箱色变成封签'],
-  ['新版本接手下一件','下一只箱子换回土黄色，仍盖着方章。v2 读取保存的规则，把它送到北库。','一条反馈走完了从任务结果到后续任务的路'],
-];
-const layers=[
-  {name:'上下文',tag:'眼前的任务单',color:'#d3c6a0',detail:'把“先看封签”放进下一次调用的任务单，模型当场看得见。后续是否继续可见，取决于任务单怎样保留。',example:'下一次调用收到的文字变了。'},
-  {name:'记忆',tag:'可检索的档案',color:'#9ab69b',detail:'把误投和正确做法记入档案。收到相似包裹时，先检索这条经验，再放进当前任务单。',example:'长期存放经验，取出后才成为上下文。'},
-  {name:'技能',tag:'可复用的工序',color:'#cfb077',detail:'把检查封签、查目的地、核对投递单写成可重复调用的步骤。新包裹可以直接使用这套工序。',example:'改变的是处理一类任务时复用的做法。'},
-  {name:'工具与流程',tag:'传感器与控制器',color:'#84aba5',detail:'为机器接入封签扫描器，并让控制器在分流前调用它。这里的 harness 指组织模型怎样工作的一套外部程序。',example:'系统多了一个可调用的动作，执行顺序也变了。'},
-  {name:'模型参数',tag:'识别器内部',color:'#d2a58a',detail:'用带正确目的地的样本训练模型，把辨认封签的能力写进权重。新输入到来时，模型自身的响应发生变化。',example:'SEAL 研究了让模型生成自编辑并据此更新权重。'},
-];
-const authors=['自己更新','教师更新','共同更新'];
-const timings=['在线','离线','混合'];
-const forms=['链','树','图'];
-const chapterNotes=[
-  '《Understanding RSI》采用较宽的口径：环境给出反馈，更新机制改变系统状态，新状态参与后续任务。评估时还要检查改变是否有效。更新者可以是系统自己，也可以是外部教师。',
-  '研究常把智能体拆成模型与组织其工作的外部系统。上下文、记忆、技能、工具和流程可能同时变化。SEAL 和 ReasoningBank 分别给出了参数更新与经验记忆的实际研究例子。',
-  '更新者和更新时机是两条独立的分类轴。教师可以是人、模型或外部训练程序。这里的混合方案在线记经验、离线换规则，是混合更新的一种实现。',
-  '点代表可区分的系统版本，线代表继承或组合关系。这里用“两支合并”演示图结构。Darwin Gödel Machine 的档案展示了为什么保留多个分支有助于继续探索。',
-  '训练样本、筛选候选规则的验证样本，以及最后报告成绩的独立测试承担不同职责。换任务、重复试验、控制成本和基线，是把“这里有效”推广到更多场景所需要的证据。',
-  'STOP 把一个代码改进程序应用于它自身。可以改变改进器的外部代码，而不更新基础语言模型的权重。本实验只检验一个挑选规则的工序；普遍的自我加速还需要跨任务、跨轮次和等资源对照的证据。',
-];
 function stamp(x,y,shape,size=6){
   const s=size;
   if(shape==='circle')return `<circle cx="${x}" cy="${y}" r="${s}" fill="#f8f1d8" stroke="#354e46" stroke-width="1.7"/>`;
@@ -414,7 +559,7 @@ function sorter(x,y,version){
 }
 function bin(x,y,north,lite){
   const fill=lite?'#a1b99e':'#d1d1ba';
-  return g(x,y,`${deck(0,0,43,26,29,fill)}${path('M4 0l22 -10 34 9 -21 10Z','#657e6c',ink,.9)}${path('M8 9l26 7v12l-26 -7Z','#f1e7c8','#889680',.8)}${txt(21,20,north?'北':'南',11,ink,'middle','transform="rotate(14 21 20)"')}`);
+  return g(x,y,`${deck(0,0,43,26,29,fill)}${path('M4 0l22 -10 34 9 -21 10Z','#657e6c',ink,.9)}${path('M8 9l26 7v12l-26 -7Z','#f1e7c8','#889680',.8)}${txt(21,20,north?text('北','N'):text('南','S'),11,ink,'middle','transform="rotate(14 21 20)"')}`);
 }
 function movingParcel(points,color){
   const [ex,ey]=points[points.length-1];
@@ -437,13 +582,13 @@ function loopPlate(){
   const item=s===1||s===3?updateCard(s):movingParcel(s===0?[...intake,[490,192],[518,189]]:north,s===2?'#9eae82':'#d1af77');
   const belt=path('M390 186 448 173 487 113 M389 193 448 192 492 211','none','#849c82',2);
   const linecolor=s===0?coral:teal, trace=s===0?'M405 192 448 192 493 211':s===4||s===2?'M405 184 448 173 483 116':'M104 186 179 204 230 190';
-  const tags=loopTitles.map((t,i)=>txt(65+i*129,274,`${i+1} ${t}`,14,i===s?coral:'#6c7d70','middle',i===s?'font-weight="700"':'')).join('');
-  return figBase('包裹经过扫描器和南北分流口',`${belt}${path(trace,'none',linecolor,3,'class="flow-line"')}${bin(500,112,true,s===4||s===2)}${bin(503,213,false,s===0)}
+  const tags=copy.loopTitles.map((t,i)=>txt(65+i*129,274,`${i+1} ${t}`,14,i===s?coral:'#6c7d70','middle',i===s?'font-weight="700"':'')).join('');
+  return figBase(text('包裹经过扫描器和南北分流口','A parcel passes the scanner and reaches the north or south bin'),`${belt}${path(trace,'none',linecolor,3,'class="flow-line"')}${bin(500,112,true,s===4||s===2)}${bin(503,213,false,s===0)}
     ${sorter(192,145,v)}${item}
-    ${path('M92 132V96h66','none','#819180',1.1)}${txt(93,86,'方章 → 北库',15,ink,'start')}
-    ${path('M294 107 315 70h54','none','#829683',1.1)}${txt(318,58,'封签扫描器',15,ink,'start')}
-    ${txt(540,59,'北库',15)}${txt(549,171,'南库',15)}${line(45,247,595,247,'#bdc4b0',1.2)}
-    ${loopTitles.map((t,i)=>`<circle cx="${65+i*129}" cy="247" r="${i===s?6:4}" fill="${i<=s?linecolor:'#e2e5d5'}" stroke="#879780"/>`).join('')}${tags}`);
+    ${path('M92 132V96h66','none','#819180',1.1)}${txt(93,86,text('方章 → 北库','Square → North'),15,ink,'start')}
+    ${path('M294 107 315 70h54','none','#829683',1.1)}${txt(318,58,text('封签扫描器','Stamp scanner'),15,ink,'start')}
+    ${txt(540,59,text('北库','North'),15)}${txt(549,171,text('南库','South'),15)}${line(45,247,595,247,'#bdc4b0',1.2)}
+    ${copy.loopTitles.map((t,i)=>`<circle cx="${65+i*129}" cy="247" r="${i===s?6:4}" fill="${i<=s?linecolor:'#e2e5d5'}" stroke="#879780"/>`).join('')}${tags}`);
 }
 function layerDetails(i,x,y){
   if(i===0)return g(x+34,y+2,path('M0 0 20 -9 55 0 36 9Z','#f4edd2','#87927b',.8)+path('M10 0 26 -6 M17 3 34 -4 M25 6 41 -1','none','#a1a485',1.1));
@@ -456,30 +601,30 @@ function partsPlate(){
   const selected=model.parts.part;
   let content=deck(102,234,178,72,12,'#bfc7ad');
   for(let i=4;i>=0;i--){
-    const y=42+i*40,x=131+(i===selected?-18:0),color=layers[i].color;
+    const y=42+i*40,x=131+(i===selected?-18:0),color=layerColors[i];
     const slab=deck(x,y,143,55,9,color)+layerDetails(i,x,y)+bolt(x+10,y+6)+bolt(x+132,y+39);
     const ay=42+i*44,px=x+198,py=y+11;
-    const label=`<rect class="hitring" x="413" y="${ay-15}" width="157" height="29" rx="5" fill="${i===selected?'#e4ebd8':'#f5f3e8'}" stroke="${i===selected?'#59856d':'#c5c9b4'}" stroke-width="${i===selected?1.8:1}"/>`+txt(427,ay+4,`${i+1}　${layers[i].name}`,15,i===selected?teal:ink,'start','font-weight="600"');
-    content+=`<g class="hot" role="button" tabindex="0" data-action="part" data-value="${i}" aria-label="看${layers[i].name}" aria-pressed="${i===selected}">${slab}${path(`M${px-2} ${py}H${px+13}L387 ${ay}H413`,'none',i===selected?teal:'#9ca993',1.3)}${label}</g>`;
+    const label=`<rect class="hitring" x="413" y="${ay-15}" width="157" height="29" rx="5" fill="${i===selected?'#e4ebd8':'#f5f3e8'}" stroke="${i===selected?'#59856d':'#c5c9b4'}" stroke-width="${i===selected?1.8:1}"/>`+txt(427,ay+4,`${i+1}${text('　','  ')}${copy.layers[i].name}`,15,i===selected?teal:ink,'start','font-weight="600"');
+    content+=`<g class="hot" role="button" tabindex="0" data-action="part" data-value="${i}" aria-label="${text('看','Explore ')}${copy.layers[i].name}" aria-pressed="${i===selected}">${slab}${path(`M${px-2} ${py}H${px+13}L387 ${ay}H413`,'none',i===selected?teal:'#9ca993',1.3)}${label}</g>`;
   }
-  return figBase('分拣机的五个可选择部件',content);
+  return figBase(text('分拣机的五个可选择部件','Five selectable parts of the sorter'),content);
 }
 function gridNode(x,y,label,selected=false,sub='',w=114){
   return `<rect x="${x-w/2}" y="${y-19}" width="${w}" height="38" rx="6" fill="${selected?'#d9e7d3':'#f7f5e8'}" stroke="${selected?'#52846c':'#a4b09a'}" stroke-width="${selected?1.8:1.2}"/>`+txt(x,y+5,label,15,selected?teal:ink,'middle','font-weight="600"')+(sub?txt(x,y+43,sub,12,'#627469'):'');
 }
 function updatesPlate(){
   const {by,when,ran}=model.updates;
-  const owners=[['分拣机','自己改规则'],['教师','提供新规则'],['分拣机 + 教师','提议和复核']];
-  const timeline=when===0?['收件 ①','换版','收件 ②','收件 ③']:when===1?['收件 ①','收件 ②','收件 ③','换版']:['收件 ①','记经验','收件 ②','批末换版'];
+  const owners=[[text('分拣机','Sorter'),text('自己改规则','Writes its rule')],[text('教师','Teacher'),text('提供新规则','Supplies a rule')],[text('分拣机 + 教师','Sorter + teacher'),text('提议和复核','Propose and review')]];
+  const timeline=when===0?[text('收件 ①','Parcel 1'),text('换版','Switch version'),text('收件 ②','Parcel 2'),text('收件 ③','Parcel 3')]:when===1?[text('收件 ①','Parcel 1'),text('收件 ②','Parcel 2'),text('收件 ③','Parcel 3'),text('换版','Switch version')]:[text('收件 ①','Parcel 1'),text('记经验','Log experience'),text('收件 ②','Parcel 2'),text('批末换版','Switch at end')];
   const steps=timeline.map((label,i)=>{
     const changed=(when===0&&i===1)||(when===1&&i===3)||(when===2&&i===3), logged=when===2&&i===1;
     const x=76+i*159;
     return `<circle cx="${x}" cy="208" r="${changed||logged?9:6}" fill="${ran?(changed?coral:logged?amber:teal):'#e1e3d1'}" stroke="#758b77" stroke-width="1.3"/>`
-      +txt(x,240,label,15,changed?coral:ink)+((label.startsWith('收件')&&ran)?txt(x,263,when===0&&i>1?'由 v2 分拣':'由 v1 分拣',12,'#546e61'):'');
+      +txt(x,240,label,15,changed?coral:ink)+((!changed&&!logged&&ran)?txt(x,263,when===0&&i>1?text('由 v2 分拣','Sorted by v2'):text('由 v1 分拣','Sorted by v1'),12,'#546e61'):'');
   }).join('');
-  return figBase('更新者的交接与批次时间线',`${path('M140 78H253 M386 78H497','none',ran?teal:'#abb5a0',2,ran?'class="flow-line"':'')}${txt(209,74,'→',22)}${txt(433,74,'→',22)}
-    ${gridNode(92,78,'投递记录',ran)}${gridNode(320,78,owners[by][0],true,owners[by][1],145)}${gridNode(550,78,'新规则',ran)}
-    ${line(40,158,600,158,'#bdc6b1',1)}${txt(42,185,'批次内的顺序',13,ink,'start')}
+  return figBase(text('更新者的交接与批次时间线','Rule handoff and timeline for a batch of parcels'),`${path('M140 78H253 M386 78H497','none',ran?teal:'#abb5a0',2,ran?'class="flow-line"':'')}${txt(209,74,'→',22)}${txt(433,74,'→',22)}
+    ${gridNode(92,78,text('投递记录','Delivery log'),ran)}${gridNode(320,78,owners[by][0],true,owners[by][1],145)}${gridNode(550,78,text('新规则','New rule'),ran)}
+    ${line(40,158,600,158,'#bdc6b1',1)}${txt(42,185,text('批次内的顺序','Batch timeline'),13,ink,'start')}
     ${line(76,208,553,208,ran?'#6e927a':'#b6bfaa',2.4)}${steps}`);
 }
 const graphs=[
@@ -490,8 +635,8 @@ const graphs=[
 function versionsPlate(){
   const {form,pick}=model.versions, graph=graphs[form];
   const edges=graph.edges.map(([from,to])=>{const [x,y]=graph.nodes[from],[u,v]=graph.nodes[to];const mid=(x+u)/2;return path(`M${x+24} ${y} C${mid} ${y} ${mid} ${v} ${u-26} ${v}`,'none',to===pick?coral:'#8ea18b',to===pick?2.8:1.7,to===pick?'class="flow-line"':'')+path(`M${u-32} ${v-3}l6 3 -6 3`,'none',to===pick?coral:'#80957f',1.6);}).join('');
-  const dots=graph.nodes.map(([x,y,id],i)=>`<g class="hot" role="button" tabindex="0" data-action="pick" data-value="${i}" aria-label="查看 ${id}" aria-pressed="${i===pick}"><circle class="hitring" cx="${x}" cy="${y}" r="26" fill="${i===pick?'#cfe0c8':'#e8e9d6'}" stroke="${i===pick?teal:'#899982'}" stroke-width="1.8"/>${txt(x,y+5,id,15,ink,'middle','font-weight="700"')}</g>`).join('');
-  return figBase('可点击的分拣机版本与继承关系',`${edges}${dots}${txt(320,270,'箭头指向继承改动的新版本',14,'#64786a')}`);
+  const dots=graph.nodes.map(([x,y,id],i)=>`<g class="hot" role="button" tabindex="0" data-action="pick" data-value="${i}" aria-label="${text('查看','Inspect')} ${id}" aria-pressed="${i===pick}"><circle class="hitring" cx="${x}" cy="${y}" r="26" fill="${i===pick?'#cfe0c8':'#e8e9d6'}" stroke="${i===pick?teal:'#899982'}" stroke-width="1.8"/>${txt(x,y+5,id,15,ink,'middle','font-weight="700"')}</g>`).join('');
+  return figBase(text('可点击的分拣机版本与继承关系','Selectable sorter versions and their inheritance links'),`${edges}${dots}${txt(320,270,text('箭头指向继承改动的新版本','Arrows point to the version that inherits a change.'),14,'#64786a')}`);
 }
 const shipments=[
   [{color:'o',shape:'circle',north:false},{color:'g',shape:'square',north:true},{color:'o',shape:'circle',north:false},{color:'g',shape:'square',north:true}],
@@ -499,19 +644,18 @@ const shipments=[
   [{color:'o',shape:'diamond',north:true},{color:'g',shape:'triangle',north:false},{color:'g',shape:'diamond',north:true},{color:'o',shape:'triangle',north:false}],
 ];
 const squareKey={circle:false,square:true}, diamondKey={triangle:false,diamond:true};
-const batchNames=['熟悉批次','交换箱色','换新封签'];
 function prediction(item,rule,key=squareKey){return rule==='color'?item.color==='g':key[item.shape];}
 function successes(items,rule,key=squareKey){return items.reduce((n,item)=>n+Number(prediction(item,rule,key)===item.north),0);}
 function testMark(x,y,answer,truth){
-  const label=answer===undefined?'待核对':answer?'北库':'南库', color=answer===undefined?'#786b51':answer===truth?teal:coral;
+  const label=answer===undefined?text('待核对','No rule'):answer?text('北库','North'):text('南库','South'), color=answer===undefined?'#786b51':answer===truth?teal:coral;
   return g(x,y,`<rect x="-33" y="-15" width="66" height="26" rx="6" fill="${answer===undefined?'#eae4cf':answer===truth?'#e0ead7':'#edd9ca'}" stroke="${answer===undefined?'#c6bea2':answer===truth?'#99b29b':'#c49b83'}"/>`
     +txt(0,3,`${answer===undefined?'':answer===truth?'✓ ':'× '}${label}`,13,color,'middle','font-weight="600"'));
 }
 function testsPlate(){
   const b=model.tests.batch, batch=shipments[b];
-  const packages=batch.map((p,i)=>{const x=169+i*96;return parcel(x,69,p.color==='o'?'#d5ad70':'#9bad82',p.shape,.98,true)+txt(x,114,`应去${p.north?'北':'南'}库`,12,'#5d7063');}).join('');
-  const rows=['color','seal'].map((rule,i)=>{const y=164+i*66;return txt(39,y+2,i?'看封签':'看箱色',16,ink,'start','font-weight="600"')+batch.map((p,j)=>testMark(169+j*96,y,prediction(p,rule),p.north)).join('')+txt(555,y+3,`${successes(batch,rule)} / 4`,17,teal,'middle','font-weight="700"');}).join('');
-  return figBase('两条规则对同一批包裹的逐件预测',`${packages}${line(32,132,608,132,'#b1bda7')}${rows}${line(32,193,608,193,'#c9cebb',1)}${txt(555,114,'投对件数',12,'#5d7063')}${txt(318,274,'✓ 投对　　× 投错　　待核对＝没有适用规则',13,'#647467')}`);
+  const packages=batch.map((p,i)=>{const x=169+i*96;return parcel(x,69,p.color==='o'?'#d5ad70':'#9bad82',p.shape,.98,true)+txt(x,114,p.north?text('应去北库','To north'):text('应去南库','To south'),12,'#5d7063');}).join('');
+  const rows=['color','seal'].map((rule,i)=>{const y=164+i*66;return txt(39,y+2,i?text('看封签','Stamp'):text('看箱色','Color'),16,ink,'start','font-weight="600"')+batch.map((p,j)=>testMark(169+j*96,y,prediction(p,rule),p.north)).join('')+txt(555,y+3,`${successes(batch,rule)} / 4`,17,teal,'middle','font-weight="700"');}).join('');
+  return figBase(text('两条规则对同一批包裹的逐件预测','Predictions from two rules for the same batch of parcels'),`${packages}${line(32,132,608,132,'#b1bda7')}${rows}${line(32,193,608,193,'#c9cebb',1)}${txt(555,114,text('投对件数','Correct'),12,'#5d7063')}${txt(318,274,text('✓ 投对　　× 投错　　待核对＝没有适用规则','✓ Correct     × Wrong     No rule = no entry for this stamp'),13,'#647467')}`);
 }
 // Verification parcels are distinct from the final test parcels. Some feature
 // combinations recur because each depot handles only two colors and two seals.
@@ -525,15 +669,15 @@ function improverPlate(){
   const s=model.improver.phase;
   const rows=[0,1].map(i=>{
     const y=104+i*97, feedback=i&&s>=1,rule=chooseRule(validation[i]),ready=s>=2;
-    const rowLabel=i?(feedback?'改过的挑选器':'同版挑选器'):'原来的挑选器';
-    const sampler=feedback?'检查冲突线索':'取两个常见样本';
+    const rowLabel=i?(feedback?text('改过的挑选器','Revised picker'):text('同版挑选器','Identical picker')):text('原来的挑选器','Original picker');
+    const sampler=feedback?text('检查冲突线索','Conflicting clues'):text('取两个常见样本','Familiar pair');
     const metric=s===3?`${improveScores()[i]} / 4`:'—';
     return txt(90,y+4,rowLabel,15,ink)+path(`M160 ${y}H206 M346 ${y}H392 M482 ${y}H515`,'none','#96a992',1.6,s>0?'class="flow-line"':'')
-      + gridNode(270,y,sampler,Boolean(feedback),'',139)+gridNode(435,y,ready?(rule==='color'?'看箱色':'看封签'):'待选择',ready,'',88)
+      + gridNode(270,y,sampler,Boolean(feedback),'',139)+gridNode(435,y,ready?(rule==='color'?text('看箱色','Color'):text('看封签','Stamp')):text('待选择','Pending'),ready,'',88)
       +`<circle cx="552" cy="${y}" r="29" fill="${s===3?(i?'#d4e5cf':'#ebd9c9'):'#e6e7d6'}" stroke="${s===3?(i?teal:coral):'#9eac96'}" stroke-width="1.7"/>${txt(552,y+5,metric,16,ink,'middle','font-weight="700"')}`
       +(ready?validation[i].map((p,j)=>parcel(256+j*30,y+34,p.color==='o'?'#d5ad70':'#9bad82',p.shape,.45)).join(''):'');
   }).join('');
-  return figBase('等资源对照的挑选器实验',`${txt(87,48,'同一起点',14,'#637767')}${txt(270,48,'怎样挑测试样本',14,'#637767')}${txt(433,48,'选出的规则',14,'#637767')}${txt(552,48,'新站成绩',14,'#637767')}${rows}${line(29,154,611,154,'#bfc8b3',1)}${txt(325,272,'每个挑选器：2 个验证样本 · 2 条候选规则 · 同一批独立测试',13,'#64776b')}`);
+  return figBase(text('等资源对照的挑选器实验','Two rule pickers compared with equal resources'),`${txt(87,48,text('同一起点','Same start'),14,'#637767')}${txt(270,48,text('怎样挑测试样本','How it samples'),14,'#637767')}${txt(433,48,text('选出的规则','Chosen rule'),14,'#637767')}${txt(552,48,text('新站成绩','Test score'),14,'#637767')}${rows}${line(29,154,611,154,'#bfc8b3',1)}${txt(325,272,text('每个挑选器：2 个验证样本 · 2 条候选规则 · 同一批独立测试','Each picker: 2 validation parcels · 2 candidate rules · the same separate test set'),13,'#64776b')}`);
 }
 function chips(label,opts,sel,action){
   return `<div><span class="field-label">${label}</span><div class="chips" role="group" aria-label="${label}">${opts.map((opt,i)=>`<button data-action="${action}" data-value="${i}" aria-pressed="${i===sel}">${opt}</button>`).join('')}</div></div>`;
@@ -542,63 +686,70 @@ function button(label,action,main=false,disabled=false){return `<button class="$
 function note(index){
   switch(index){
     case 0:{
-      const step=model.loop.step,[title,detail,info]=loopDetails[step];
+      const step=model.loop.step,[title,detail,info]=copy.loopDetails[step];
       const auto=timer!==null;
-      return `<span class="action-label">循环中的第 ${step+1} 步，共 5 步</span><div class="steps">${loopTitles.map((_,i)=>`<i class="${i<=step?'done':''}"></i>`).join('')}</div><h2>${title}</h2><p>${detail}</p><p class="readout">${info}</p><div class="actions">${button(step===4?'重新开始 ↺':'下一步 →','step',true)}${button(auto?'暂停':'自动播放','play')}${step>0&&step<4?button('复位','reset'):''}</div>`;
+      return `<span class="action-label">${text(`循环中的第 ${step+1} 步，共 5 步`,`Feedback loop · Step ${step+1} of 5`)}</span><div class="steps">${copy.loopTitles.map((_,i)=>`<i class="${i<=step?'done':''}"></i>`).join('')}</div><h2>${title}</h2><p>${detail}</p><p class="readout">${info}</p><div class="actions">${button(step===4?text('重新开始 ↺','Start again ↺'):text('下一步 →','Next step →'),'step',true)}${button(auto?text('暂停','Pause'):text('自动播放','Auto-play'),'play')}${step>0&&step<4?button(text('复位','Reset'),'reset'):''}</div>`;
     }
     case 1:{
-      const i=model.parts.part,l=layers[i];
-      return `${chips('选择写入位置',layers.map(p=>p.name),i,'part')}<h2>${l.tag}</h2><p>${l.detail}</p><p class="readout">${l.example}</p>`;
+      const i=model.parts.part,l=copy.layers[i];
+      return `${chips(text('选择写入位置','Choose where to save the change'),copy.layers.map(p=>p.name),i,'part')}<h2>${l.tag}</h2><p>${l.detail}</p><p class="readout">${l.example}</p>`;
     }
     case 2:{
       const s=model.updates;
-      const by=['分拣机自己从误投中提出并写入新规则。','外部教师复核投递记录，再把新规则交回分拣机。','分拣机提出候选规则，教师复核后一起完成更新。'][s.by];
-      const result=['从第二件起使用 v2，更新发生在批次内。','这一批仍由 v1 分拣。批末验证并换版，下一批使用 v2。','第一件后在线记入经验，批末统一验证换版，下一批使用 v2。'][s.when];
-      return `${chips('谁负责更新',authors,s.by,'author')}${chips('何时更新',timings,s.when,'timing')}<h2>${s.ran?'批次已走完':'准备开工'}</h2><p>${by}</p><p class="readout">${s.ran?result:'运行一个批次，看任务序列中何时出现新版本。'}</p><div class="actions">${button(s.ran?'重置批次 ↺':'运行一批 →','batch-run',true)}</div>`;
+      const by=copy.authorDetails[s.by];
+      const result=copy.timingResults[s.when];
+      return `${chips(text('谁负责更新','Who updates the rule?'),copy.authors,s.by,'author')}${chips(text('何时更新','When does it take effect?'),copy.timings,s.when,'timing')}<h2>${s.ran?text('批次已走完','The batch is complete'):text('准备开工','Ready to sort')}</h2><p>${by}</p><p class="readout">${s.ran?result:text('运行一个批次，看任务序列中何时出现新版本。','Run a batch and watch where the new version takes over.')}</p><div class="actions">${button(s.ran?text('重置批次 ↺','Reset batch ↺'):text('运行一批 →','Run a batch →'),'batch-run',true)}</div>`;
     }
     case 3:{
       const {form,pick}=model.versions,graph=graphs[form],v=graph.nodes[pick][2],parents=graph.edges.filter(pair=>pair[1]===pick).map(pair=>graph.nodes[pair[0]][2]);
-      const detail=['每次换版都从刚刚使用的版本继续，来路只有一条。','同一版本可以衍生出多种改法。保留分支，之后还能回到另一条路上继续试。','两个分支可以把各自的发现交给同一个新版。这里展示的是图结构中的合并。'][form];
-      return `${chips('选择版本关系',forms,form,'form')}<h2>${forms[form]}上的 ${v}</h2><p>${detail}</p><p class="readout">${parents.length?`${v} 的直接来源是 ${parents.join(' 和 ')}。`:`${v} 是这次演示的起点。`}</p>${chips('追踪一个版本',graph.nodes.map(n=>n[2]),pick,'pick')}`;
+      const detail=copy.versionDetails[form];
+      return `${chips(text('选择版本关系','Choose a version history'),copy.forms,form,'form')}<h2>${text(`${copy.forms[form]}上的 ${v}`,`${copy.forms[form]} · ${v}`)}</h2><p>${detail}</p><p class="readout">${parents.length?text(`${v} 的直接来源是 ${parents.join(' 和 ')}。`,`${v} inherits directly from ${parents.join(' and ')}.`):text(`${v} 是这次演示的起点。`,`${v} is the starting version.`)}</p>${chips(text('追踪一个版本','Trace a version'),graph.nodes.map(n=>n[2]),pick,'pick')}`;
     }
     case 4:{
       const b=model.tests.batch;
-      const detail=['方章恰好全在橄榄色箱上，圆章全在土黄色箱上。两条规则都能解释这批成绩。','形状和目的地都没变，只把箱色交换了。旧批次隐藏的差别现在逐件可见。','新站改用菱章和三角章。旧封签表没有条目，系统需要新信息；所有待核对件都不计作投对。'][b];
-      return `${chips('选择测试批次',batchNames,b,'test-batch')}<h2>${['两条规则都满分','交换一个线索','规则遇到边界'][b]}</h2><p>${detail}</p><p class="readout">看箱色投对 ${successes(shipments[b],'color')} 件。看封签投对 ${successes(shipments[b],'seal')} 件。每批共 4 件。</p>`;
+      const detail=copy.testDetails[b];
+      const color=successes(shipments[b],'color'), seal=successes(shipments[b],'seal');
+      return `${chips(text('选择测试批次','Choose a test batch'),copy.batchNames,b,'test-batch')}<h2>${copy.testTitles[b]}</h2><p>${detail}</p><p class="readout">${text(`看箱色投对 ${color} 件。看封签投对 ${seal} 件。每批共 4 件。`,`Color rule: ${color} of 4 correct. Stamp rule: ${seal} of 4 correct.`)}</p>`;
     }
     case 5:{
       const s=model.improver.phase;
-      const titles=['先比较两条候选规则','改的是挑选规则的办法','把两套挑选器给新站','比较下一轮的改进能力'];
-      const info=['旧工序总挑两个熟悉样本。看箱色和看封签都投对时，就按约定选排在前面的箱色规则。','系统从上一站的误投中修改挑选工序：保留两个样本的预算，让其中一个样本的箱色和封签给出相反线索。','新站使用菱章和三角章。两套挑选器各拿到两条候选规则和两个名额，按各自方法取样、评分、选出规则。','两套挑选器面对同一新任务、预算相同，所选规则在独立测试上的表现不同。这支持本例的挑选方法变好，证据范围只到这个玩具任务。'];
-      const read=['当前被测试的是“怎样选规则”这一层。','改变已经写入挑选器，下一个站可以继承。','新站的验证集与最终测试分别收件，重复的颜色和形状只是包裹类别。',`原挑选器选出的规则投对 ${improveScores()[0]} / 4。改过的挑选器选出的规则投对 ${improveScores()[1]} / 4。`];
-      return `<span class="action-label">对照实验 · 第 ${s+1} 步，共 4 步</span><h2>${titles[s]}</h2><p>${info[s]}</p><p class="readout">${read[s]}</p><div class="actions">${button(s===3?'再做一次 ↺':['修改挑选器 →','交给新站 →','独立检验 →'][s],'improve-step',true)}${s>0&&s<3?button('复位','improve-reset'):''}</div>`;
+      const titles=copy.improverTitles;
+      const info=copy.improverInfo;
+      const [originalScore,revisedScore]=improveScores();
+      const read=s<3?copy.improverRead[s]:text(
+        `原挑选器选出的规则投对 ${originalScore} / 4。改过的挑选器选出的规则投对 ${revisedScore} / 4。`,
+        `The original picker’s rule routed ${originalScore} of 4 correctly. The revised picker’s rule routed ${revisedScore} of 4 correctly.`);
+      return `<span class="action-label">${text(`对照实验 · 第 ${s+1} 步，共 4 步`,`Controlled comparison · Step ${s+1} of 4`)}</span><h2>${titles[s]}</h2><p>${info[s]}</p><p class="readout">${read}</p><div class="actions">${button(s===3?text('再做一次 ↺','Try again ↺'):[text('修改挑选器 →','Revise the picker →'),text('交给新站 →','Move to the new station →'),text('独立检验 →','Run the separate test →')][s],'improve-step',true)}${s>0&&s<3?button(text('复位','Reset'),'improve-reset'):''}</div>`;
     }
   }
 }
 const plates=[loopPlate,partsPlate,updatesPlate,versionsPlate,testsPlate,improverPlate];
-const figureNames=['封签扫描与分流口','分拣机剖面','规则交接台','分拣机版本谱系','逐件投递记录','挑选器对照台'];
-const hints=['按“下一步”追踪规则','点击部件或名称查看','改变两项设置，再运行一批','点击版本，追踪继承关系','切换批次，对照每件结果','两边的试验预算始终相同'];
 function repaint(focusKey){
   $$('art').innerHTML=plates[active]();
   $$('note').innerHTML=note(active);
   if(focusKey){const next=$$('main').querySelector(focusKey);if(next)next.focus({preventScroll:true});}
 }
+function zoomLabel(){return zoomed?text('收起图 ↙','Reduce figure ↙'):text('放大图 ↗','Enlarge figure ↗');}
 function showChapter(i){
   const c=chapters[i];
   const tabs=chapters.map((it,j)=>`<a href="#${it.id}"${i===j?' aria-current="page"':''}>${j+1} ${it.short}</a>`).join('');
-  return `<section class="work"><div class="route-bar"><a href="#atlas" class="back">← 返回路线图</a><nav class="route-tabs" aria-label="六站路线">${tabs}</nav></div><div class="chapter-heading"><div class="term">第 ${i+1} 站 / 共 6 站</div><h1 id="chapter-title" tabindex="-1">${c.name}</h1><p>${c.intro}</p></div>
-    <div class="bench"><figure class="plate"><figcaption class="plate-head"><strong>${figureNames[i]} · 教学模型</strong><button class="zoom" data-action="zoom" aria-pressed="false">放大图 ↗</button></figcaption><div id="art" class="art"></div><div class="plate-foot">${hints[i]}</div></figure><section id="note" class="notes" aria-label="实验操作与解释"></section></div>
-    <details class="annotation"><summary>这和真实研究有什么关系？</summary><p>${chapterNotes[i]}</p>${c.refs.map(sourceLink).join(' ')}</details>
-    <div class="nav-row"><a href="#${i?chapters[i-1].id:'atlas'}">← ${i?chapters[i-1].nav:'路线图'}</a><a href="#${i<5?chapters[i+1].id:'atlas'}">${i<5?'下一站 · '+chapters[i+1].nav:'回看整张地图'} →</a></div></section>`;
+  return `<section class="work"><div class="route-bar"><a href="#atlas" class="back">${text('← 返回路线图','← Route map')}</a><nav class="route-tabs" aria-label="${text('六站路线','Six-stop route')}">${tabs}</nav></div><div class="chapter-heading"><div class="term">${text(`第 ${i+1} 站 / 共 6 站`,`Stop ${i+1} of 6`)}</div><h1 id="chapter-title" tabindex="-1">${c.name}</h1><p>${c.intro}</p></div>
+    <div class="bench${zoomed?' zoomed':''}"><figure class="plate"><figcaption class="plate-head"><strong>${copy.figureNames[i]} · ${text('教学模型','Teaching model')}</strong><button class="zoom" data-action="zoom" aria-pressed="${zoomed}">${zoomLabel()}</button></figcaption><div id="art" class="art"></div><div class="plate-foot">${copy.hints[i]}</div></figure><section id="note" class="notes" aria-label="${text('实验操作与解释','Experiment controls and explanation')}"></section></div>
+    <details class="annotation"><summary>${text('这和真实研究有什么关系？','How does this connect to research?')}</summary><p>${copy.chapterNotes[i]}</p>${c.refs.map(sourceLink).join(' ')}</details>
+    <div class="nav-row"><a href="#${i?chapters[i-1].id:'atlas'}">← ${i?chapters[i-1].nav:text('路线图','Route map')}</a><a href="#${i<5?chapters[i+1].id:'atlas'}">${i<5?text('下一站 · ','Next · ')+chapters[i+1].nav:text('回看整张地图','Back to the map')} →</a></div></section>`;
 }
 function stopPlay(){if(timer!==null){clearInterval(timer);timer=null;}}
-function renderPage(move=false){
-  stopPlay();
-  zoomed=false;
+function renderPage(move=false,keepView=false){
+  const annotationOpen=keepView&&$$('main').querySelector('.annotation[open]');
+  if(!keepView){stopPlay();zoomed=false;}
   const key=location.hash.slice(1);active=chapters.findIndex(c=>c.id===key);
   $$('main').innerHTML=active<0?overview():showChapter(active);
-  if(active>=0)repaint();
-  document.title=active<0?'递归自改进图鉴 · RSI Atlas':`${chapters[active].nav} · 递归自改进图鉴`;
+  if(active>=0){
+    repaint();
+    if(annotationOpen)$$('main').querySelector('.annotation').open=true;
+  }
+  updateLanguageLink();
+  document.title=active<0?text('递归自改进图鉴 · RSI Atlas','RSI Atlas · Recursive Self-Improvement'):`${chapters[active].nav} · ${text('递归自改进图鉴','RSI Atlas')}`;
   if(move){window.scrollTo({top:0,behavior:'instant'});($$('chapter-title')||$$('main')).focus({preventScroll:true});}
 }
 function operate(el){
@@ -607,7 +758,7 @@ function operate(el){
     zoomed=!zoomed;
     $$('main').querySelector('.bench').classList.toggle('zoomed',zoomed);
     el.setAttribute('aria-pressed',String(zoomed));
-    el.textContent=zoomed?'收起图 ↙':'放大图 ↗';
+    el.textContent=zoomLabel();
     return;
   }
   if(op==='step'){stopPlay();model.loop.step=(model.loop.step+1)%5;}
@@ -622,7 +773,7 @@ function operate(el){
         model.loop.step++;
         if(model.loop.step===4)stopPlay();
         repaint(key);
-        $$('announcement').textContent=loopDetails[model.loop.step][0];
+        $$('announcement').textContent=copy.loopDetails[model.loop.step][0];
       },2100);
     }
   }
@@ -642,8 +793,25 @@ function operate(el){
 }
 $$('main').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)operate(b);});
 $$('main').addEventListener('keydown',e=>{const b=e.target.closest('g[role=button]');if(b&&(e.key===' '||e.key==='Enter')){e.preventDefault();operate(b);}});
+$$('language-link').addEventListener('click',event=>{
+  if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+  event.preventDefault();
+  const next=otherLanguage();
+  // File URLs permit fragment changes but may reject query changes through history.
+  try { history.replaceState(history.state,'',$$('language-link').href); }
+  catch(error){if(location.protocol!=='file:'||error.name!=='SecurityError')throw error;}
+  setLanguage(next);
+  renderPage(false,true);
+});
 window.addEventListener('hashchange',()=>renderPage(true));
+window.addEventListener('popstate',()=>{
+  if(location.protocol!=='file:'&&language!==urlLanguage()){
+    setLanguage(urlLanguage());
+    renderPage(false,true);
+  }
+});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&timer!==null){stopPlay();if(active===0)repaint();}});
+setLanguage(urlLanguage());
 renderPage();
 </script>
 </body>
