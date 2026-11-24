@@ -1,0 +1,333 @@
+.tone-teal {
+  --top: #d3e9dc;
+  --face: #b4d5c5;
+  --side: #83ada0;
+  --edge: #41635b;
+  --dark: #467b6d;
+}
+.tone-rose {
+  --top: #f6dce2;
+  --face: #e9c0cb;
+  --side: #c28d9f;
+  --edge: #724557;
+  --dark: #a25670;
+}
+.tone-gold {
+  --top: #f5e6c2;
+  --face: #e7d3a2;
+  --side: #c5a974;
+  --edge: #6d5e45;
+  --dark: #9e793f;
+}
+.tone-neutral {
+  --top: #e6e7dc;
+  --face: #d7dace;
+  --side: #b2baad;
+  --edge: #647064;
+  --dark: #7a8b79;
+}
+[data-theme='dark'] .tone-teal {
+  --top: #507c6e;
+  --face: #446659;
+  --side: #2f4e44;
+  --edge: #aed6c4;
+  --dark: #a6c7b9;
+}
+[data-theme='dark'] .tone-rose {
+  --top: #846676;
+  --face: #704c60;
+  --side: #573b4a;
+  --edge: #ebbbc7;
+  --dark: #dfabba;
+}
+[data-theme='dark'] .tone-gold {
+  --top: #82734e;
+  --face: #695d43;
+  --side: #544c35;
+  --edge: #dfcca4;
+  --dark: #d0ba92;
+}
+[data-theme='dark'] .tone-neutral {
+  --top: #59655d;
+  --face: #445249;
+  --side: #333f37;
+  --edge: #afbeb0;
+  --dark: #85968b;
+}
+.art .shadow,
+.ground,
+.slip-shadow,
+.sheet-shadow {
+  fill: var(--shadow);
+}
+.art .top,
+.art .face,
+.art .side,
+.art .paperleaf,
+.art .outline,
+.art .stamp {
+  stroke: var(--edge);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.art .top,
+.art .paperleaf {
+  fill: var(--top);
+}
+.art .face {
+  fill: var(--face);
+}
+.art .side {
+  fill: var(--side);
+}
+.art .etched,
+.art .outline,
+.art .stamp {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.art .stamp {
+  stroke: var(--teal);
+  stroke-width: 2.5;
+}
+.art .inkfill {
+  fill: var(--edge);
+}
+.rail-guide,
+.ink-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rail-guide {
+  stroke: var(--line-dark);
+  stroke-dasharray: 2 5;
+  stroke-width: 1.2;
+  opacity: 0.61;
+}
+.ink-line {
+  stroke-width: 2.6;
+  stroke-dasharray: 1 1;
+}
+.ink-line.teal {
+  stroke: var(--teal);
+}
+.ink-line.gold {
+  stroke: var(--gold);
+}
+.ink-line.rose {
+  stroke: var(--rose);
+}
+.plinth-side,
+.plinth-top {
+  stroke: var(--edge);
+  stroke-width: 1.15;
+  stroke-linejoin: round;
+}
+.plinth-side {
+  fill: var(--side);
+}
+.plinth-top {
+  fill: var(--top);
+}
+.sheet-face,
+.cabinet-face,
+.token rect,
+.switch-knob,
+.specimen-shell,
+.slip-face,
+.robot .shell {
+  fill: var(--top);
+  stroke: var(--edge);
+  stroke-width: 1.65;
+  stroke-linejoin: round;
+}
+.sheet-rule,
+.cabinet-rim,
+.slip-fold,
+.slip-ink {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sheet-rule,
+.cabinet-rim {
+  opacity: 0.63;
+}
+.rivet {
+  fill: var(--edge);
+}
+.paper-line {
+  fill: none;
+  stroke: var(--edge);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.65;
+}
+.cabinet-leg {
+  fill: var(--side);
+  stroke: var(--edge);
+  stroke-width: 1.3;
+}
+.drawer-slot,
+.module-slot {
+  fill: var(--face);
+  stroke: var(--edge);
+  stroke-width: 0.85;
+}
+.label-mask {
+  fill: var(--paper);
+}
+.edit-strip {
+  fill: var(--light-teal);
+  stroke: var(--teal);
+  stroke-width: 0.7;
+}
+.matrix-cell,
+.hinge-base {
+  fill: var(--paper);
+  stroke: var(--edge, var(--line-dark));
+  stroke-width: 1;
+}
+.matrix-learned {
+  fill: var(--teal);
+}
+.switch-arm {
+  fill: none;
+  stroke: var(--rose);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.switch-knob {
+  fill: var(--light-rose);
+  stroke: var(--rose);
+  stroke-width: 1.3;
+}
+.specimen-core {
+  fill: var(--face);
+  stroke: var(--edge);
+  stroke-width: 0.8;
+}
+.module-fork {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.mark circle {
+  stroke-width: 1.4;
+}
+.mark.yes circle {
+  fill: var(--light-teal);
+  stroke: var(--teal);
+}
+.mark.no circle {
+  fill: var(--light-rose);
+  stroke: var(--rose);
+}
+.mark-stroke {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.yes .mark-stroke {
+  stroke: var(--teal);
+}
+.no .mark-stroke {
+  stroke: var(--rose);
+}
+.room-wall,
+.room-floor {
+  stroke: var(--line-dark);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+.room-wall {
+  fill: var(--light-gold);
+  fill-opacity: 0.7;
+}
+.room-floor {
+  fill: var(--light-teal);
+}
+.wall-hatch {
+  fill: none;
+  stroke: var(--line-dark);
+  stroke-width: 1;
+  opacity: 0.68;
+}
+.shelf path {
+  fill: var(--light-gold);
+  stroke: var(--gold);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.robot .lamp {
+  fill: var(--gold);
+  stroke: var(--edge);
+  stroke-width: 1.25;
+}
+.robot .visor {
+  fill: var(--edge);
+}
+.robot-eyes,
+.robot-wire {
+  fill: none;
+  stroke-linecap: round;
+}
+.robot-eyes {
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+.robot-wire {
+  stroke: var(--edge);
+  stroke-width: 3;
+}
+.film text {
+  fill: var(--ink);
+  user-select: none;
+}
+.glyph-text,
+.body-type,
+.token-type {
+  font: 710 13px var(--sans);
+}
+.sheet-header {
+  font: 820 10.3px var(--sans);
+  letter-spacing: 0.045em;
+}
+.sheet-foot,
+.micro {
+  font: 700 10.5px var(--sans);
+}
+.sheet-foot,
+.micro {
+  fill: var(--muted);
+}
+.prop-label {
+  font: 780 14px var(--sans);
+}
+.equation,
+.figure-number {
+  font: 800 19px var(--mono);
+  letter-spacing: -0.045em;
+}
+.code-type {
+  font: 650 13px var(--mono);
+}
+.code-small {
+  font: 700 11px var(--mono);
+}
+.node-number {
+  font: 750 15px var(--mono);
+}
+.specimen .node-number,
+.token .token-type {
+  fill: var(--edge);
+}

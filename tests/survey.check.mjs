@@ -2,100 +2,155 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-
-const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-function script(id) {
-  const match = html.match(new RegExp(`<script id="${id}">([\\s\\S]*?)</script>`));
-  assert.ok(match, `Missing inline script ${id}`);
-  return match[1];
-}
-
-const ctx = vm.createContext({ langIndex: 0 });
-vm.runInContext(`
-  const l = pair => pair[langIndex];
-  const esc = text => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  ${script('survey-data')}
-  ${script('paper-diagrams')}
-  ${script('map-art')}
-`, ctx);
-const { stories, chapters, controls, film, map } = vm.runInContext(
-  '({ stories: STORIES, chapters: CHAPTERS, controls: MEDICAL_CONTROLS, film: makeFilm, map: atlasMap })', ctx
-);
-
-test('one ordered narrative, with bilingual feedback, persistence, updater and evidence for each paper', () => {
-  assert.equal(stories[0].id, 'base-agent');
-  const studies = stories.slice(1);
-  assert.equal(studies.length, 11);
-  assert.equal(new Set(studies.map(s => s.arxiv)).size, studies.length);
-  const order = Array.from(new Set(stories.map(s => s.chapter)));
-  assert.deepEqual(order, Array.from(chapters.slice(0, -1), c => c.id));
-  assert.equal(chapters.at(-1).id, 'compare');
-  assert.equal(new Set([...stories, ...chapters].map(s => s.id)).size, stories.length + chapters.length);
-  for (const study of studies) {
-    assert.match(study.arxiv, /^(?:\d{4}\.\d{5}|cs\/\d{7})$/);
-    assert.equal(study.fields.length, 4);
-    for (const pair of [study.body, study.boundary, study.evidence, study.locator, ...study.fields]) {
-      assert.equal(pair.length, 2);
-      assert.match(pair[0], /[\u3400-\u9fff]/);
-      assert.ok(pair[1].trim());
-    }
+const root = new URL('../', import.meta.url);
+const load = (file) => readFileSync(new URL(file, root), 'utf8');
+function course(edition) {
+  const ctx = vm.createContext({
+    URL,
+    location: { href: `https://example.org/${edition}/` },
+    matchMedia: () => ({ matches: false })
+  });
+  const html = load(edition + '/index.html');
+  for (const [, file] of html.matchAll(/<script src="([^"]+)"><\/script>/g)) {
+    if (!file.endsWith('/player.js')) vm.runInContext(load(edition + '/' + file), ctx, { filename: file });
   }
-});
-
-test('wide and portrait maps expose one link to each stop in narrative order', () => {
-  for (const lang of [0, 1]) {
-    ctx.langIndex = lang;
-    for (const portrait of [false, true]) {
-      const markup = map(portrait, -1);
-      const stops = [...markup.matchAll(/<a class="map-stop [^"]*" href="#([^"]+)"/g)].map(m => m[1]);
-      assert.deepEqual(stops, Array.from(stories, s => s.id));
-      assert.doesNotMatch(markup, /undefined|NaN/);
-    }
-  }
-});
-
-function render(study, choice, portrait, t) {
-  const clip = film(study, choice, portrait);
-  return clip.svg(study).replace(/data-motion="(\d+)"/g, (_, index) =>
-    Object.entries(clip.tracks[Number(index)].attrs).map(([attr, get]) => `${attr}="${get(t)}"`).join(' '));
+  return { ctx, run: (source) => vm.runInContext(source, ctx) };
 }
-
-test('each beat contains reversible motion in both languages and both orientations', () => {
-  for (const lang of [0, 1]) {
-    ctx.langIndex = lang;
-    for (const portrait of [false, true]) {
-      for (const study of stories) {
-        for (let beat = 0; beat < 4; beat++) {
-          const before = render(study, undefined, portrait, beat + .10);
-          const after = render(study, undefined, portrait, beat + .86);
-          assert.ok(before.includes(study.title[lang]));
-          assert.doesNotMatch(before + after, /\b(?:undefined|NaN|Infinity)\b/);
-          assert.notEqual(before, after, `${study.name}, beat ${beat + 1} must move`);
-          assert.equal(render(study, undefined, portrait, beat + .10), before);
-        }
+const general = course('general'),
+  medical = course('medical');
+const array = (value) => JSON.parse(JSON.stringify(value));
+test('two independent bilingual editions lead to their distinct subjects', () => {
+  const g = general.run('COURSE'),
+    m = medical.run('COURSE');
+  assert.deepEqual(
+    Array.from(g.lessons.slice(0, 4), (s) => s.id),
+    ['base-agent', 'harness', 'si', 'rsi']
+  );
+  assert.deepEqual(
+    Array.from(m.lessons, (s) => s.id),
+    ['base-agent', 'harness', 'si', 'training', 'fixed-solver', 'unseen']
+  );
+  assert.doesNotMatch(JSON.stringify(g), /MedicalRSI|2611\.26806|临床|病例/i);
+  assert.ok(!load('general/index.html').includes('medical/'));
+  for (const edition of [g, m]) {
+    assert.equal(new Set(edition.lessons.map((s) => s.id)).size, edition.lessons.length);
+    for (const s of edition.lessons) {
+      assert.equal(s.beats.length, 4);
+      for (const pair of [s.title, s.deck, ...s.beats.flatMap((b) => [b.label, b.text])]) {
+        assert.equal(pair.length, 2);
+        assert.ok(pair.every((x) => x.trim()));
       }
     }
   }
+  for (const s of m.lessons) assert.match(s.ref.url, /2611\.26806v1#(?:S\d|A\d)/);
 });
-
-test('choices change which artifacts appear or reach their destination', () => {
-  ctx.langIndex = 1;
-  const at = (id, choice, t = 2.98) => render(stories.find(s => s.id === id), choice, false, t);
-  assert.ok(at('star', 'miss').includes('Training answer hint'));
-  assert.ok(!at('star', 'correct').includes('Training answer hint'));
-  assert.ok(at('dgm', 'node6').includes('23.3% · 60 tasks'));
-  assert.ok(at('dgm', 'node24').includes('40.5% · 200 tasks'));
-  assert.notEqual(at('hyperagents', 'task'), at('hyperagents', 'meta'));
-  const versionMarks = choice => at('hyperagents', choice).match(/class="version-mark"/g).length;
-  assert.equal(versionMarks('both'), versionMarks('meta') + 1);
-  assert.equal(versionMarks('task'), versionMarks('meta'));
-  assert.match(at('medicalrsi', undefined, 0), /<g opacity="1"><text[^>]+>2 \/ 11<\/text>/);
-  assert.match(at('medicalrsi', undefined, 3), /<g opacity="1"><text[^>]+>11 \/ 11<\/text>/);
-});
-
-test('MedicalRSI Figure 5a comparisons preserve fixed solvers and original precision', () => {
-  assert.deepEqual(Array.from(controls, c => [c.id, ...c.scores, c.gain]), [
-    ['q-base', 37, 61, 66, 4.7], ['q-grpo', 63, 70, 77, 7.0],
-    ['g-base', 6, 47, 56, 9.1], ['g-grpo', 52, 50, 61, 10.2]
+test('the same tools and solver admit different feasible open-day plans for different goals', () => {
+  const scores = general.run(
+    `['capacity','buffer'].map(p=>{const plan=makePlan(EVENTS.day,p,'presenter');return [plan.seats,plan.gap,plan.feasible]})`
+  );
+  assert.deepEqual(array(scores), [
+    [96, 15, true],
+    [72, 60, true]
   ]);
+  const changed = general.run(
+    `makePlan(EVENTS.day, 'capacity', 'presenter', EVENTS.day.slots.filter(s=>s.room===1))`
+  );
+  assert.deepEqual(array([changed.seats, changed.gap, changed.slot.room, changed.feasible]), [
+    72,
+    30,
+    1,
+    true
+  ]);
+  assert.equal(general.run('evaluatePlan(EVENTS.day, EVENTS.day.slots[0]).feasible'), false);
+});
+test('same new task, solver, evaluator and preference isolate the proposed constraint', () => {
+  const controls = general.run(
+    `['capacity','buffer'].map(p=>['presenter','resource'].map(r=>{const plan=makePlan(EVENTS.night,p,r);return [plan.seats,plan.gap,plan.feasible]}))`
+  );
+  assert.deepEqual(array(controls), [
+    [
+      [96, 15, false],
+      [96, 45, true]
+    ],
+    [
+      [72, 75, true],
+      [72, 75, true]
+    ]
+  ]);
+});
+test('the research map and comparison cover ten primary papers with both roles and distinct evidence', () => {
+  const studies = general.run('PAPERS');
+  assert.equal(studies.length, 10);
+  assert.equal(new Set(studies.map((p) => p.arxiv)).size, 10);
+  for (const s of studies) {
+    assert.match(s.arxiv, /^(?:\d{4}\.\d{5}|cs\/\d{7})$/);
+    assert.equal(s.fields.length, 4);
+    for (const p of [s.evidence, s.boundary, s.locator, ...s.fields]) {
+      assert.match(p[0], /[\u3400-\u9fff]/);
+      assert.ok(p[1].trim());
+    }
+  }
+  const map = general.run('researchAtlas()');
+  const ids = [...map.matchAll(/class="paper-pin" href="#([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(
+    ids,
+    Array.from(studies, (s) => s.id)
+  );
+  for (const s of general.run('paperLessons')) assert.equal(s.roles.length, 3);
+});
+function snapshot(film, entity, t) {
+  return film.svg(entity).replace(/data-motion="(\d+)"/g, (_, idx) =>
+    Object.entries(film.tracks[idx].attrs)
+      .map(([key, f]) => `${key}="${f(t)}"`)
+      .join(' ')
+  );
+}
+test('every scene has seekable motion in both languages and orientations', () => {
+  for (const edition of [general, medical])
+    for (const lang of ['zh', 'en'])
+      for (const phone of [true, false]) {
+        edition.run(`language='${lang}'`);
+        for (const s of edition.run('COURSE.lessons')) {
+          const film = edition.run(
+              `visualFor(COURSE.lessons.find(s=>s.id==='${s.id}'),COURSE.defaults,${phone})`
+            ),
+            entity = s.paper || s;
+          for (let k = 0; k < 4; k++) {
+            const a = snapshot(film, entity, k + 0.12),
+              b = snapshot(film, entity, k + 0.86);
+            assert.notEqual(a, b, `${edition.run('COURSE.kind')} / ${s.id}, beat ${k + 1} has no motion`);
+            assert.doesNotMatch(a + b, /\b(?:undefined|NaN|Infinity)\b/);
+            assert.equal(
+              snapshot(film, entity, k + 0.12),
+              a,
+              'Seeking backwards restores the same drawing'
+            );
+          }
+        }
+      }
+});
+test('paper controls and matched medical figures preserve source results', () => {
+  general.run("language='en'");
+  const at = (id, choice) => {
+    const s = general.run(`COURSE.lessons.find(s=>s.id==='${id}')`),
+      film = general.run(
+        `visualFor(COURSE.lessons.find(s=>s.id==='${id}'),{...COURSE.defaults,'${id}':'${choice}'},false)`
+      );
+    return snapshot(film, s.paper, 2.98);
+  };
+  assert.match(at('star', 'miss'), /Training answer hint/);
+  assert.doesNotMatch(at('star', 'correct'), /Training answer hint/);
+  assert.match(at('dgm', 'node6'), /23.3% · 60 tasks/);
+  assert.match(at('dgm', 'node24'), /40.5% · 200 tasks/);
+  assert.notEqual(at('hyperagents', 'task'), at('hyperagents', 'meta'));
+  assert.deepEqual(array(medical.run('MEDICAL_CONTROLS.map(c=>[c.id,...c.scores,c.gain])')), [
+    ['q-base', 37, 61, 66, 4.7],
+    ['q-grpo', 63, 70, 77, 7],
+    ['g-base', 6, 47, 56, 9.1],
+    ['g-grpo', 52, 50, 61, 10.2]
+  ]);
+  const s = medical.run('COURSE.lessons.at(-1)'),
+    f = medical.run('visualFor(COURSE.lessons.at(-1),COURSE.defaults,false)');
+  assert.match(snapshot(f, s, 0), /<g opacity="1"><text[^>]+>2 \/ 11<\/text>/);
+  assert.match(snapshot(f, s, 4), /<g opacity="1"><text[^>]+>11 \/ 11<\/text>/);
 });

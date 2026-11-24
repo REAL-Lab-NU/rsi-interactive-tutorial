@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN" data-edition="medical">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>MedicalRSI 论文导读 · Paper Walkthrough</title>
+    <meta
+      name="description"
+      content="Follow model–harness co-evolution and the fixed-solver comparisons in the MedicalRSI paper."
+    />
+    <meta property="og:title" content="MedicalRSI 论文导读 · Paper Walkthrough" />
+    <meta
+      property="og:description"
+      content="Follow model–harness co-evolution and the fixed-solver comparisons in the MedicalRSI paper."
+    />
+    <link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../assets/font.css" />
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem('rsi-atlas-theme') ||
+          (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
+    <link rel="stylesheet" href="../assets/film.css" />
+    <link rel="stylesheet" href="../assets/site.css" />
+  </head>
+  <body>
+    <a id="skip" class="skip" href="#content">跳到内容 / Skip to content</a>
+    <div class="container">
+      <div id="mast"></div>
+      <div class="workspace">
+        <aside id="rail"></aside>
+        <main id="content" tabindex="-1"></main>
+      </div>
+    </div>
+    <dialog id="panel" aria-labelledby="panel-title">
+      <div class="panel-head">
+        <h2 id="panel-title"></h2>
+        <button id="close-panel" class="icon-btn" aria-label="关闭"></button>
+      </div>
+      <div id="panel-body"></div>
+    </dialog>
+    <noscript
+      ><main>
+        <h1>MedicalRSI 论文导读 · Paper Walkthrough</h1>
+        <p>
+          从病历查询到两个角色的联合训练和固定 Solver 的实验。论文全文见
+          <a href="https://arxiv.org/html/2611.26806v1">MedicalRSI</a>。
+        </p>
+        <p>启用 JavaScript 播放动画。 Enable JavaScript to play or scrub the walkthrough.</p>
+      </main></noscript
+    >
+    <script src="../assets/common.js"></script>
+    <script src="../assets/film.js"></script>
+    <script src="../assets/plates.js"></script>
+    <script src="results.js"></script>
+    <script src="course.js"></script>
+    <script src="visuals.js"></script>
+    <script src="../assets/player.js"></script>
+  </body>
+</html>
