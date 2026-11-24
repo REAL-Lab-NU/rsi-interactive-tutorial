@@ -16,9 +16,10 @@ vm.runInContext(`
   const esc = text => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   ${script('survey-data')}
   ${script('paper-diagrams')}
+  ${script('map-art')}
 `, ctx);
-const { stories, chapters, controls, draw } = vm.runInContext(
-  '({ stories: STORIES, chapters: CHAPTERS, controls: MEDICAL_CONTROLS, draw: scene })', ctx
+const { stories, chapters, controls, film, map } = vm.runInContext(
+  '({ stories: STORIES, chapters: CHAPTERS, controls: MEDICAL_CONTROLS, film: makeFilm, map: atlasMap })', ctx
 );
 
 test('one ordered narrative, with bilingual feedback, persistence, updater and evidence for each paper', () => {
@@ -41,34 +42,55 @@ test('one ordered narrative, with bilingual feedback, persistence, updater and e
   }
 });
 
-test('every illustrated step renders from the shipped model in both languages', () => {
+test('wide and portrait maps expose one link to each stop in narrative order', () => {
   for (const lang of [0, 1]) {
     ctx.langIndex = lang;
-    for (const s of stories) {
-      const frames = new Set();
-      for (let i = 0; i < s.steps.length; i++) {
-        const frame = draw(s, i, undefined, true, 'test');
-        assert.match(frame, /^<svg\b/);
-        assert.ok(frame.includes(s.steps[i].title[lang]));
-        assert.doesNotMatch(frame, /\bundefined\b|\bNaN\b/);
-        frames.add(frame);
-      }
-      assert.equal(frames.size, s.steps.length);
+    for (const portrait of [false, true]) {
+      const markup = map(portrait, -1);
+      const stops = [...markup.matchAll(/<a class="map-stop [^"]*" href="#([^"]+)"/g)].map(m => m[1]);
+      assert.deepEqual(stops, Array.from(stories, s => s.id));
+      assert.doesNotMatch(markup, /undefined|NaN/);
     }
   }
 });
 
-test('experimental controls change the artifact or program shown', () => {
+function render(study, choice, portrait, t) {
+  const clip = film(study, choice, portrait);
+  return clip.svg(study).replace(/data-motion="(\d+)"/g, (_, index) =>
+    Object.entries(clip.tracks[Number(index)].attrs).map(([attr, get]) => `${attr}="${get(t)}"`).join(' '));
+}
+
+test('each beat contains reversible motion in both languages and both orientations', () => {
+  for (const lang of [0, 1]) {
+    ctx.langIndex = lang;
+    for (const portrait of [false, true]) {
+      for (const study of stories) {
+        for (let beat = 0; beat < 4; beat++) {
+          const before = render(study, undefined, portrait, beat + .10);
+          const after = render(study, undefined, portrait, beat + .86);
+          assert.ok(before.includes(study.title[lang]));
+          assert.doesNotMatch(before + after, /\b(?:undefined|NaN|Infinity)\b/);
+          assert.notEqual(before, after, `${study.name}, beat ${beat + 1} must move`);
+          assert.equal(render(study, undefined, portrait, beat + .10), before);
+        }
+      }
+    }
+  }
+});
+
+test('choices change which artifacts appear or reach their destination', () => {
   ctx.langIndex = 1;
-  const figure = (id, step, choice) => draw(stories.find(s => s.id === id), step, choice, false, 'test');
-  assert.ok(figure('star', 1, 'miss').includes('TRAINING HINT'));
-  assert.ok(!figure('star', 1, 'correct').includes('TRAINING HINT'));
-  assert.ok(figure('dgm', 2, 'node6').includes('23.3% · 60 tasks'));
-  assert.ok(figure('dgm', 2, 'node24').includes('40.5% · 200 tasks'));
-  assert.notEqual(figure('hyperagents', 2, 'task'), figure('hyperagents', 2, 'meta'));
-  assert.equal(figure('hyperagents', 2, 'both').match(/>Transferred</g).length, 2);
-  assert.equal(figure('medicalrsi', 0).match(/class="check-ok"/g).length, 2);
-  assert.equal(figure('medicalrsi', 2).match(/class="check-ok"/g).length, 13);
+  const at = (id, choice, t = 2.98) => render(stories.find(s => s.id === id), choice, false, t);
+  assert.ok(at('star', 'miss').includes('Training answer hint'));
+  assert.ok(!at('star', 'correct').includes('Training answer hint'));
+  assert.ok(at('dgm', 'node6').includes('23.3% · 60 tasks'));
+  assert.ok(at('dgm', 'node24').includes('40.5% · 200 tasks'));
+  assert.notEqual(at('hyperagents', 'task'), at('hyperagents', 'meta'));
+  const versionMarks = choice => at('hyperagents', choice).match(/class="version-mark"/g).length;
+  assert.equal(versionMarks('both'), versionMarks('meta') + 1);
+  assert.equal(versionMarks('task'), versionMarks('meta'));
+  assert.match(at('medicalrsi', undefined, 0), /<g opacity="1"><text[^>]+>2 \/ 11<\/text>/);
+  assert.match(at('medicalrsi', undefined, 3), /<g opacity="1"><text[^>]+>11 \/ 11<\/text>/);
 });
 
 test('MedicalRSI Figure 5a comparisons preserve fixed solvers and original precision', () => {
