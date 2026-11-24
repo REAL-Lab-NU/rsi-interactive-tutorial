@@ -1,5 +1,6 @@
 'use strict';
 const isSurvey = COURSE.kind === 'general';
+const story = COURSE.story;
 const lessons = COURSE.lessons;
 const read = (id) => lessons.find((s) => s.id === id);
 const choices = { ...COURSE.defaults };
@@ -10,7 +11,7 @@ let frame = 0,
   activeBeat = -1,
   draw = null,
   opener = null;
-const duration = 4600;
+const duration = story?.beatDuration || 4600;
 function routeId() {
   let id = '';
   try {
@@ -32,7 +33,7 @@ function railway() {
           .map((id) => {
             const s = read(id);
             const current = id === session.id || (id === 'atlas' && active?.paper);
-            return `<a class="rail-stop" href="#${id}" ${current ? 'aria-current="step"' : ''}><i></i><span>${esc(l(s ? s.tab : T('浏览方法', 'Browse methods')))}</span></a>`;
+            return `<a class="rail-stop" href="#${id}" ${current ? 'aria-current="step"' : ''}>${story ? story.chapterIcon(id) : '<i></i>'}<span>${esc(l(s ? s.tab : T('浏览方法', 'Browse methods')))}</span></a>`;
           })
           .join('')}</div></div>`
     )
@@ -76,6 +77,7 @@ function actionFor(s) {
       isSurvey ? 'atlas' : lessons[0].id,
       isSurvey ? T('回到论文图谱', 'Back to papers') : T('回到开头', 'Start again')
     ];
+  if (story) return [next.id, next.tab];
   return [next.id, T('下一幕', 'Next scene')];
 }
 function sourceTag(s) {
@@ -98,8 +100,9 @@ function scenePage(s) {
       <div class="heading-tools">${back}<button class="utility" data-panel="notes">${icon('notes')}${notesLabel}</button></div>
     </div>
     <section class="screen" aria-label="${words('可交互动画', 'Interactive animation')}">
-      ${roleKey(s)}${optionsFor(s)}
+      ${roleKey(s)}${story ? '' : optionsFor(s)}
       <div id="drawing" class="drawing${s.paper ? ' paper-film' : ''}"></div>
+      ${story ? optionsFor(s) : ''}
       <div class="subtitle"><span id="beatno" class="beatno"></span><p id="subtitle"></p></div>
     </section>
     <section class="controls" aria-label="${words('播放控制', 'Playback controls')}">
@@ -153,7 +156,8 @@ function closePanel(resume = true) {
 }
 function render(focus = false, animation = false) {
   const s = read(session.id);
-  dom('mast').innerHTML = mast(COURSE.edition);
+  const previous = story && animation && !reduced.matches ? dom('drawing')?.firstElementChild : null;
+  dom('mast').innerHTML = mast(COURSE.edition, story?.mark);
   dom('rail').innerHTML = railway();
   const rail = dom('rail').querySelector('.rail'),
     current = rail.querySelector('[aria-current="step"]');
@@ -166,7 +170,8 @@ function render(focus = false, animation = false) {
   if (s) mountDrawing();
   else draw = null;
   if (focus) dom('content').focus({ preventScroll: true });
-  if (animation && !reduced.matches)
+  if (previous) story.turnPage(previous, dom('drawing'));
+  else if (animation && !reduced.matches)
     dom('content').animate(
       [
         { opacity: 0.73, transform: 'translateY(4px)' },
@@ -178,6 +183,7 @@ function render(focus = false, animation = false) {
 function mountDrawing() {
   const s = read(session.id);
   if (!s) return;
+  if (story) story.finishMotion();
   const film = visualFor(s, choices, compact.matches),
     stage = dom('drawing');
   stage.innerHTML = film.svg(s.paper || s);
@@ -187,6 +193,7 @@ function mountDrawing() {
   updatePlay();
 }
 function caption(s, k) {
+  if (story) return story.caption(s, k, choices);
   if (s.id === 'star' && k === 1 && choices.star === 'correct')
     return T(
       '预测正确，原来的理由直接进入训练候选集。',
@@ -211,17 +218,22 @@ function paint() {
     if (k === i) b.setAttribute('aria-current', 'step');
     else b.removeAttribute('aria-current');
   });
+  if (story) story.showBeat(s, k);
 }
 function updatePlay() {
   const b = dom('play');
   if (!b) return;
   const key = session.playing ? 'pause' : session.t >= 4 ? 'replay' : 'play';
-  b.innerHTML = icon(key);
   const label = { pause: T('暂停', 'Pause'), replay: T('重播', 'Replay'), play: T('播放', 'Play') }[key];
+  b.innerHTML = icon(key) + (story ? `<span>${esc(l(label))}</span>` : '');
   b.title = l(label);
   b.setAttribute('aria-label', l(label));
 }
-function halt() {
+function halt(keepBarTransition = false) {
+  if (story) {
+    if (keepBarTransition) story.cancelGlide();
+    else story.finishMotion();
+  }
   cancelAnimationFrame(frame);
   frame = 0;
   tickAt = 0;
@@ -246,6 +258,7 @@ function tick(now) {
 }
 function play() {
   if (!read(session.id) || session.modal || session.playing) return;
+  if (story) story.cancelGlide();
   if (session.t >= 4) session.t = 0;
   session.playing = true;
   tickAt = 0;
@@ -277,27 +290,28 @@ function go(
   if (historyUpdate) recordRoute(compare ? 'compare' : id, replace);
   render(focus, changed && focus);
   if (compare) openPanel('compare');
-  else if (auto) play();
+  else if (auto && !(story && story.waitForReader(id, choices))) play();
 }
 function pick(key, value) {
   const s = read(session.id),
     opt = s?.options?.find((o) => o.key === key);
   if (!opt?.values.some(([v]) => v === value)) return;
-  halt();
+  const previous = choices[key];
+  halt(key === 'solver');
   session.tour = false;
   choices[key] = value;
   document
     .querySelectorAll(`button[data-option="${key}"]`)
     .forEach((b) => b.setAttribute('aria-pressed', String(b.value === value)));
+  if (story) {
+    story.choose(key, value, previous);
+    return;
+  }
   // Compare outcomes at the point the edit is applied; keep switching reversible.
   const phase = s.paper ? PAPER_OPTIONS[s.id].phase : 2;
-  if (key === 'solver') {
-    session.t = 4;
-  } else {
-    session.t = phase + (reduced.matches ? 0.96 : 0);
-  }
+  session.t = phase + (reduced.matches ? 0.96 : 0);
   mountDrawing();
-  if (!reduced.matches && key !== 'solver') play();
+  if (!reduced.matches) play();
 }
 document.addEventListener('click', (event) => {
   const el = event.target.closest('a,button');
@@ -329,7 +343,8 @@ document.addEventListener('click', (event) => {
   else if (el.id === 'close-panel') closePanel();
   else if (el.dataset.panel) openPanel(el.dataset.panel, el);
   else if (el.matches('[data-tour]')) go(lessons.find((s) => s.paper).id, { tour: true, auto: true });
-  else if (el.dataset.beat !== undefined) seek(Number(el.dataset.beat) + 0.96);
+  else if (el.dataset.beat !== undefined)
+    (story ? story.moveToBeat : seek)(Number(el.dataset.beat) + 0.96);
   else if (el.dataset.option) pick(el.dataset.option, el.value);
   else if (
     el.matches('a[href^="#"]') &&
@@ -374,7 +389,7 @@ document.addEventListener('keydown', (event) => {
   }
   if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
     event.preventDefault();
-    seek(Math.min(3, Math.max(0, activeBeat + (event.key === 'ArrowRight' ? 1 : -1))) + 0.96);
+    (story ? story.moveToBeat : seek)(Math.min(3, Math.max(0, activeBeat + (event.key === 'ArrowRight' ? 1 : -1))) + 0.96);
   }
 });
 window.addEventListener('hashchange', () => {

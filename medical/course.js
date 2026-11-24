@@ -4,225 +4,248 @@ const citation = (id, zh, en) => ({ url: paperURL + '#' + id, label: T(zh, en) }
 const clinical = [
   lesson(
     'base-agent',
-    T('Agent 与任务', 'Agent and task'),
-    T('一次病历查询怎样出错？', 'Where did a chart query go wrong?'),
+    T('一次病历查询', 'A chart query'),
+    T('算一天的血糖，要翻多久的病历？', 'How much of the chart counts as one day?'),
     T(
-      '模拟任务只问过去 24 小时的平均血糖。沿着 Solver 的一次查询，看一整年的记录是在哪一步进了答案。',
-      'The simulated task asks for average glucose over the last 24 hours. Follow one query to see where a full year of records entered the answer.'
+      '蓝帽子叫 Solver。陪它做一道模拟病历题，先选出该用的记录，再看论文里的那次尝试。',
+      'Meet the solver in the blue cap. Choose the records for a simulated chart query, then watch the attempt reported in the paper.'
     ),
     [
       beat(
-        '接收任务',
+        '读题',
         'Read the task',
-        '模型看到了限定的时间范围，准备查询观察记录。Solver 是执行这项任务的角色。',
-        'The model receives the requested time window and prepares a records query. The solver is the role doing the task.'
+        '题目要算过去 24 小时的平均血糖。你会把哪段时间的记录交给 Solver？',
+        'The task asks for average glucose over the last 24 hours. Which records would you hand to the solver?'
       ),
       beat(
-        '发出查询',
-        'Query the record',
-        'Harness 提供查询接口并执行调用。这次查询取回一整年的血糖记录。',
-        'The harness supplies the record-query interface and executes the call. This lookup returns a year of glucose observations.'
+        '翻病历',
+        'Open the chart',
+        'Solver 请工具查病历。抽屉一打开，取出来的记录覆盖了整整一年。',
+        'The solver asks a tool to search the chart. The drawer opens and a full year of observations comes back.'
       ),
       beat(
-        '聚合记录',
-        'Aggregate',
-        'Solver 在返回的记录上求平均，没有先筛出过去 24 小时。图里的点只示意时间范围。',
-        'The solver averages the returned observations before filtering to 24 hours. The dots illustrate time coverage.'
+        '算平均',
+        'Take the average',
+        '看粉色括线。论文里的 Solver 把这一整段都拿去算平均，漏了筛选时间这一步。',
+        'Follow the pink bracket. The solver in the paper averaged the whole stretch of records, skipping the time filter.'
       ),
       beat(
-        '读到失败',
-        'Read the failure',
-        '评测反馈定位到时间窗。轨迹显示缺少过滤步骤，Improver 可以据此写一条可复用的技能。',
-        'Outcome feedback exposes the window error. The trajectory shows where filtering was missing, giving the improver evidence for a reusable skill.'
+        '找原因',
+        'Find the slip',
+        '现在知道错在哪了。下一幕打开 Solver 的工具包，看看这一步可以放在哪里。',
+        'We found the missing step. Open the solver’s toolkit in the next scene to see where a reminder could live.'
       )
     ],
     {
       visual: 'window',
       ref: citation('A10.F13', '图 13 · 血糖时间窗', 'Figure 13 · glucose window'),
+      options: [
+        {
+          key: 'window',
+          kind: 'switch',
+          label: T('你会取哪段记录？', 'Which records would you use?'),
+          values: [
+            ['day', T('过去 24 小时', 'Last 24 hours')],
+            ['year', T('过去一年', 'Full year')]
+          ]
+        }
+      ],
       note: [
-        T('怎样读这个个案', 'How to read this case'),
+        T('一次失败怎样读？', 'What happened in this attempt?'),
         T(
-          '图 13 是论文报告的模拟工作流个案。作者给出的关键差别是过去一年与过去 24 小时。动画里的观察点按示意位置绘制。',
-          'Figure 13 is a simulated workflow case from the paper. The reported distinction is a year versus the last 24 hours. The observation dots are illustrative.'
+          '图 13 讲的是模拟工作流。作者报告，Solver 单独运行时取了一年的血糖记录求平均。要求是最近 24 小时。动画里的圆点和间距仅示意时间范围。你的选择标记在便签上，病历里的括线还原论文报告的运行。',
+          'Figure 13 describes a simulated workflow. The solver acting alone averaged a year of glucose records when the task required the last 24 hours. Dots and spacing illustrate the time ranges. The sticky note records your choice. The bracket shows what the paper’s solver actually did.'
         )
       ]
     }
   ),
   lesson(
     'harness',
-    T('拆开 Harness', 'Inside the harness'),
-    T('给模型一个能工作的环境', 'Give the model a working environment'),
+    T('打开工具包', 'Open the toolkit'),
+    T('模型决定查病历，谁来打开抽屉？', 'The model wants a record. Who fetches it?'),
     T(
-      '模型选择行动。Harness 组织指令、病历上下文和可用工具，执行调用，把观察和评测记录送回。',
-      'The model chooses actions. Its harness organizes instructions, chart context and tools, executes calls and returns observations and evaluation records.'
+      '一个能做事的 agent 由模型和 harness 组成。点开包里的三件东西，看模型的一句话怎样变成一次查询。',
+      'An agent combines a model with a harness. Open the three pieces of its toolkit to see how a request becomes a chart lookup.'
     ),
     [
       beat(
-        '模型',
-        'Model',
-        'Solver 角色下，模型读任务并决定查询观察记录。',
-        'As solver, the model reads the task and chooses an observation lookup.'
+        '做决定',
+        'Decide',
+        '模型读题，选了一个动作：查血糖记录。包里的运行程序负责把它的请求真正执行出来。',
+        'The model reads the task and chooses an action. Its harness runs the software that turns “look up glucose” into a tool call.'
       ),
       beat(
-        '指令与上下文',
-        'Instructions',
-        'Harness 把任务、工具说明以及这个工作流已有的技能放入模型上下文。',
-        'The harness places the task, tool descriptions and any stored workflow skill into context.'
+        '读指令',
+        'Read instructions',
+        '粉色的小纸条是指令。任务、工具说明、已有技能都会放进上下文，帮助模型决定下一步。',
+        'The pink slip carries instructions. The harness places the task, tool descriptions and available skills in the model’s context.'
       ),
       beat(
-        '工具与观察',
-        'Tools',
-        '模型请求查询，运行程序调用模拟病历环境，再把返回记录呈给模型。',
-        'The runtime executes the requested call in the simulated records environment and returns its observations to the model.'
+        '用工具',
+        'Use a tool',
+        '放大镜代表病历查询工具。运行程序调用工具，再把查到的记录交还给模型。',
+        'The magnifier is the record-query tool. The runtime calls it and hands its observations back to the model.'
       ),
       beat(
-        '控制与记忆',
-        'Control & memory',
-        '工作流记忆可以保存一条更好的技能或一个工具。下一次 Solver 执行同类任务时可以再次使用。',
-        'Workflow memory can keep a better skill or tool. The solver can use it again on another task of the same workflow.'
+        '存方法',
+        'Keep a skill',
+        '文件夹代表工作流记忆。经过检验的技能或工具可以存进去，同类任务还会再用到。',
+        'The folder is workflow memory. A tested skill or tool can live here and help with another task in the same workflow.'
       )
     ],
     {
       visual: 'anatomy',
       ref: citation('S2.F4', '图 4 · 技能、工具和记忆', 'Figure 4 · skills, tools and memory'),
+      options: [
+        {
+          key: 'part',
+          kind: 'switch',
+          label: T('打开一件看看', 'Inspect a piece'),
+          values: [
+            ['prompt', T('指令', 'Instructions')],
+            ['tool', T('工具', 'Tool')],
+            ['memory', T('记忆', 'Memory')]
+          ]
+        }
+      ],
       note: [
-        T('两种语境里的 harness', 'Two uses of harness'),
+        T('Harness 在这篇论文里指什么？', 'What does harness mean here?'),
         T(
-          '教程用 harness 指模型周围的运行程序。论文里 H₀ 是基础条件；候选医疗 harness 增添这个工作流专用的技能或工具。即使以 H₀ 运行，Solver 也能调用环境里的基础工具。',
-          'In the tutorial, harness means the software around a model. The paper uses H₀ for the base condition. A candidate medical harness adds a workflow-specific skill or tool. The solver still has its basic environment tools under H₀.'
+          '广义的 harness 是包在模型外的运行软件，管理指令、上下文、工具调用、观察和记忆。论文的基础条件 H₀ 已能使用模拟环境的基本工具。候选医疗 harness 给这个基础条件增加工作流专用技能或工具。工具包是对软件职责的插画。',
+          'The wider harness is the software around the model. It manages instructions, context, tool calls, observations and memory. The paper’s base condition H₀ already has the basic environment tools. A candidate medical harness adds a workflow-specific skill or tool. The illustrated toolkit stands for these software responsibilities.'
         )
       ]
     }
   ),
   lesson(
     'si',
-    T('SI 写入技能', 'SI writes a skill'),
-    T('这个错误能教给下一次查询什么？', 'What can the next query learn?'),
+    T('给 Solver 写技能', 'Write a solver skill'),
+    T('怎样让下一次查询记得先筛时间？', 'How can the next query remember the time filter?'),
     T(
-      '同一个模型换到 Improver 角色，读工作流的运行记录，给 Solver 写一条先限制时间窗、再聚合的技能。',
-      'The same model takes the improver role, reads workflow traces and writes a solver skill that filters the window before aggregation.'
+      '同一个模型换上粉帽子，成为写技能的 Improver。跟着那张蓝色技能卡，看它回到谁的手里。',
+      'The same model puts on the pink cap to write as the improver. Follow the blue skill card and see whose work it changes.'
     ),
     [
       beat(
-        '读轨迹',
+        '读失败',
         'Read the trace',
-        '任务限定 24 小时，查询结果却覆盖一年。Improver 读到这个工作流的一组尝试和结果反馈。',
-        'The task requests 24 hours while the query covers a year. The improver reads a batch of workflow attempts with outcome feedback.'
+        'Improver 读到尝试记录和结果反馈。题目要一天，实际却用了整年。',
+        'The improver reads attempts and their outcome feedback. The question asked for a day and the solver used a year.'
       ),
       beat(
-        '写候选技能',
-        'Propose a skill',
-        '候选技能规定先按题目所给时间范围过滤，再计算聚合值。',
-        'The candidate skill calls for filtering to the requested window before computing the aggregate.'
+        '写技能',
+        'Write a skill',
+        '粉帽子写下一条可以复用的步骤：按题目筛出时间窗，再求平均。现在把卡交给 Solver。',
+        'The pink cap writes a reusable step. Filter to the requested time window, then average. The card goes to the solver.'
       ),
       beat(
-        '同题重跑',
-        'Rerun the task',
-        '使用这份 harness，Solver 在同一工作流选中最近 24 小时的记录。',
-        'With that harness the solver selects the last 24 hours of records on the same workflow.'
+        '重跑',
+        'Try it again',
+        '蓝帽子用这张卡重跑查询。看绿色括线，较早的记录退出了计算。',
+        'The blue cap reruns the query with the card. Follow the green bracket as the older observations drop out of the calculation.'
       ),
       beat(
-        '复用技能',
-        'Reuse the skill',
-        '图 13 中，Solver 随后报告正确的平均值。复用的是 Solver 的工作方法，这就说明了 SI 层。',
-        'In Figure 13 the solver then reports the correct average. Reuse of the solver procedure illustrates the SI layer.'
+        '带到下次',
+        'Use it next time',
+        '图 13 里，这次平均值算对了。把这套做法留给下一次任务，就是自我改进（Self-Improvement，SI）。',
+        'Figure 13 reports the correct average this time. Giving the solver a better reusable way to work illustrates self-improvement (SI).'
       )
     ],
     {
       visual: 'filter',
-      ref: citation('A10.F13', '图 13 · 同一工作流', 'Figure 13 · same workflow'),
+      ref: citation('A10.F13', '图 13 · 带技能重跑', 'Figure 13 · rerun with a skill'),
       note: [
-        T('测试时改哪里？', 'What changes at test time?'),
+        T('这张卡从哪里来？', 'Where did this card come from?'),
         T(
-          '训练结束后，论文冻结权重。遇到没有存储技能的新工作流，Improver 根据该工作流的尝试写候选 harness。这个测试时个案展示了技能的效果，训练时的递归更新见下一幕。',
-          'After training the paper freezes weights. For a workflow with no stored skill, the improver writes candidate harnesses from attempts on that workflow. This test-time case shows the effect of a skill. The next scene shows the recursive update during training.'
+          '图 13 的技能来自测试批次中的失败。测试时模型权重固定，改变的是 Solver 运行时拿到的技能。两顶帽子表示论文中的两种角色，它们调用同一个模型。要看怎样训练提出修改的能力，请看下一幕。',
+          'In Figure 13 the skill was written from failures in the test batch. Model weights are fixed at test time. The solver receives a new skill when it runs. The two hats represent two roles calling one model. The next scene returns to training, where the ability to propose edits can change.'
         )
       ]
     }
   ),
   lesson(
     'training',
-    T('RSI 联合训练', 'RSI during training'),
-    T('同一个模型怎样学会写更好的修改？', 'How does one model learn to write better edits?'),
+    T('训练 Improver', 'Train the improver'),
+    T('写技能的那个角色，怎样也学得更好？', 'How does the skill writer get better, too?'),
     T(
-      'MedicalRSI 在训练时把同一个模型分别当作 Solver 和 Improver。候选 harness 给固定 Solver 带来的增益，成为写作者的奖励。',
-      'During training MedicalRSI calls one model as both solver and improver. Each candidate harness earns its writer the gain it gives the solver.'
+      '回到训练时。让同一个 Solver 跑同一批题，换上候选技能。跟着奖励，看技能的效果最终教给了谁。',
+      'Go back to training. Run the same solver on matched tasks with candidate harnesses. Follow the reward back to the model that wrote them.'
     ),
     [
       beat(
-        '从基础条件开始',
-        'Run the baseline',
-        'Solver 在 H₀ 下跑一批任务。选出的成功和失败轨迹连同结果反馈交给 Improver；写作者看不到参考答案。',
-        'The solver runs a task batch under H₀. Selected successes and failures plus outcome feedback reach the improver, without reference answers.'
+        '跑起点',
+        'Get a baseline',
+        '先在基础条件 H₀ 下跑一批题。Solver 把成功和失败的尝试连同反馈交给 Improver。',
+        'Run a task batch with the base harness H₀. The solver passes selected successful and failed attempts, with feedback, to the improver.'
       ),
       beat(
-        '提出候选',
-        'Propose candidates',
-        '共享模型切到 Improver 提示，给同一工作流写出多份候选技能或工具。每份候选装给 Solver 重跑。',
-        'The shared model switches to the improver prompt and writes candidate skills or tools for the workflow. The solver reruns it with each candidate.'
+        '写候选',
+        'Write candidates',
+        '同一个模型换到写作者的提示，提出几份候选技能或工具。每份候选都交回 Solver 试用。',
+        'With the writer’s prompt, the shared model proposes candidate skills or tools. The solver tries each candidate.'
       ),
       beat(
-        '测配对增益',
-        'Measure gain',
-        '在匹配的任务上比较候选和 H₀。评分结合任务结果与过程检查，按病例类型平均，再扣除过长文本的惩罚。',
-        'Compare each candidate to H₀ on matched tasks. Scoring combines outcome and process, balances case types and penalizes overly long text.'
+        '测增益',
+        'Measure the gain',
+        '把候选和 H₀ 放在匹配的题目上比较。候选带来的评分变化，就是给这次修改的反馈。',
+        'Compare the candidate and H₀ on matched tasks. The change in score tells us what this edit contributed.'
       ),
       beat(
-        '更新共享权重',
-        'Update shared weights',
-        'Solver 的任务奖励和 Improver 的增益奖励进入同一训练目标。下一轮，两种角色都调用更新后的模型。每个工作流另存表现更好的 harness。',
-        'Task rewards and harness-gain rewards train the same weights. Both roles use the updated model next round. Workflow memory separately retains a better harness.'
+        '教回模型',
+        'Teach the writer',
+        '两种奖励一起更新共享模型。下一轮写技能的能力也受训练，这就是递归自我改进（RSI）。',
+        'Both rewards update the shared model. They train the model that will write the next edit. This is recursive self-improvement (RSI).'
       )
     ],
     {
       visual: 'training',
       ref: citation('S2.F2', '图 2 · 公式 5、7', 'Figure 2 · Eqs. 5 and 7'),
       note: [
-        T('递归发生在哪里？', 'Where does recursion enter?'),
+        T('为什么能说在改进 Improver？', 'Why does this improve the improver?'),
         T(
-          'Solver 把候选用于下一次解题，这是第一条更新路径。候选的配对效果又训练产生候选的模型，改变下一轮如何写技能或工具。这是这篇论文中“改进改进者”的具体实现。',
-          'Using a candidate on future tasks is the first update path. Its paired effect also trains the model that generates candidates, changing how that model writes future skills or tools. This is the paper’s implementation of improving the improver.'
+          '同一组权重分别按 Solver 和 Improver 的提示运行。写作者读到轨迹和结果反馈，参考答案对它隐藏。每份候选对基础条件的增益进入写作者的训练奖励，评分综合任务结果、过程检查、病例类型平衡与长度惩罚。两种角色的奖励联合更新共享权重。每个工作流还维护自己的 harness 记忆。',
+          'One set of weights runs with separate solver and improver prompts. The writer receives traces and outcome feedback, with reference answers hidden. Its training reward reflects each candidate’s gain over baseline. Scoring combines outcome and process, balances case types and penalizes excessive length. Both rewards train the shared weights. Each workflow also maintains its own harness memory.'
         )
       ]
     }
   ),
   lesson(
     'fixed-solver',
-    T('固定 Solver 对照', 'Fixed-solver test'),
-    T('怎么知道写作者变强了？', 'How do we know the writer improved?'),
+    T('固定 Solver 做对照', 'Keep the solver fixed'),
+    T('怎么单独检验写作者的进步？', 'How can we test the writer’s contribution?'),
     T(
-      '选定一个 Solver。三根柱用同一 Solver 运行，分别使用基础条件、GRPO Improver 写的 harness 和 MedicalRSI 写的 harness。',
-      'Choose one solver. All three bars use that solver, with the base condition, a GRPO-written harness and a MedicalRSI-written harness.'
+      '选定一位 Solver，把它固定下来。每一行都是同一个 Solver，上场的 harness 写作者可以换。',
+      'Choose a solver and hold it fixed. All three rows use that solver. You can now compare the contributions of different harness writers.'
     ),
     [
       beat(
         '固定 Solver',
         'Fix the solver',
-        '保持骨干和 Solver 训练状态一致。切换上方选项可以分别查看论文图 5a 的四个对照。',
-        'Keep the backbone and solver training state fixed. Use the selector to inspect the four comparisons in Figure 5a.'
+        '小锁表示 Solver 保持固定。选单里的四种条件分别对应论文图 5a 的四组对照。',
+        'The lock holds the solver fixed. The selector gives the four comparisons from Figure 5a.'
       ),
       beat(
-        '基础条件',
-        'Solver alone',
-        '第一根柱是 Solver 单独运行时的任务成功率。',
-        'The first bar is task success with the solver alone.'
+        '看起点',
+        'Read the baseline',
+        '先读第一行。它给出只用基础条件时，这个 Solver 做对任务的比例。',
+        'Read the first row. It gives the share of tasks solved with the base condition alone.'
       ),
       beat(
-        '相同 Solver，换写作者',
-        'Swap the writer',
-        '其余两根柱只更换 harness 写作者。现在比较的是两种写作者给同一 Solver 带来的帮助。',
-        'The other two bars change the harness writer. They compare how much help each writer gives the same solver.'
+        '换写作者',
+        'Swap writers',
+        '蓝条和粉条使用不同写作者给出的 harness。Solver 相同，条长表示任务成功率。',
+        'The blue and pink bars use harnesses from different writers. The solver is identical. Bar length shows task success.'
       ),
       beat(
-        '读配对差值',
-        'Read the difference',
-        '配对差值取论文图中标注的原始精度。柱上成功率已取整，两者相减可能与标注差值略有不同。',
-        'The paired gain uses the precision printed in the paper. The bar labels are rounded, so their displayed subtraction can differ slightly.'
+        '比差值',
+        'Read the gain',
+        '粉色便签给出两位写作者相差的百分点。换一个 Solver，还可以检验这个比较是否仍然成立。',
+        'The pink slip shows the difference between writers in percentage points. Try another solver with the selector.'
       )
     ],
     {
       visual: 'controls',
-      ref: citation('S3.F5', '图 5a · 同一 Solver 的四组对照', 'Figure 5a · four fixed-solver comparisons'),
+      ref: citation('S3.F5', '图 5a · 四组固定 Solver 对照', 'Figure 5a · four fixed-solver comparisons'),
       options: [
         {
           key: 'solver',
@@ -232,62 +255,62 @@ const clinical = [
             c.id,
             T(
               c.backbone + ' · ' + (c.role === 'base' ? '基础模型' : 'GRPO Solver'),
-              c.backbone + ' · ' + (c.role === 'base' ? 'Base agent' : 'GRPO Solver')
+              c.backbone + ' · ' + (c.role === 'base' ? 'Base agent' : 'GRPO solver')
             )
           ])
         }
       ],
       note: [
-        T('实验回答的问题', 'What the control isolates'),
+        T('怎样读柱子和便签？', 'How do the bars and slip relate?'),
         T(
-          '将同一 Solver 分别与两种写作者配对，直接检验写出的 harness 是否更有用。结论限于论文中这些模拟工作流、骨干与写作者对照。',
-          'Pairing the same solver with two writers directly tests the usefulness of their harnesses. The comparison is specific to the simulated workflows, backbones and writers evaluated here.'
+          '三行使用相同骨干和 Solver 训练状态。后两行比较 GRPO 写作者和 MedicalRSI 写作者给出的 harness。论文柱上的成功率取整，便签沿用论文标出的更高精度差值，单位是百分点。实验支持这些模拟工作流和受测模型上的比较。',
+          'The three rows share a backbone and solver training state. The last two compare harnesses from the GRPO and MedicalRSI writers. Bar labels use the rounded success rates in the paper. The slip uses the paper’s higher-precision difference in percentage points. These comparisons apply to the tested models and simulated workflows.'
         )
       ]
     }
   ),
   lesson(
     'unseen',
-    T('未见工作流', 'Unseen workflow'),
-    T('换到训练时没见过的工作流', 'Try a workflow held out of training'),
+    T('换个工作流', 'Try a new workflow'),
+    T('第一次遇见的工作流，还能写出有用的技能吗？', 'Can the writer help on a workflow it has never seen?'),
     T(
-      '图 9 给出一个独立的模拟工作流个案。训练已结束，权重固定，Improver 从这个工作流自己的失败里写出一份新 harness。',
-      'Figure 9 follows a separate simulated workflow held out of training. Weights are frozen. The improver writes a new harness from failures on that workflow.'
+      '训练结束了。翻到图 9 的另一个模拟个案，一起数一数带上新技能前后通过了几项检查。',
+      'Training is over. Turn to a separate simulated case in Figure 9 and count the checks passed before and after a new skill.'
     ),
     [
       beat(
-        '第一次尝试',
-        'First attempt',
-        '基础 Solver 漏掉了时间窗和两项操作，11 项检查通过 2 项。',
-        'The base solver misses the time window and two actions. It passes 2 of 11 checks.'
+        '数第一次',
+        'Count the first run',
+        '第一次只通过 11 项中的 2 项。Solver 漏掉时间窗和两项操作。',
+        'Only two of eleven checks passed on the first run. The solver missed the time window and two actions.'
       ),
       beat(
-        '从失败写技能',
-        'Write from failures',
-        'Improver 把该工作流的失败写成技能，覆盖时间范围、决策条件和后续操作。',
-        'The improver writes a workflow skill covering the time window, decision rule and follow-up actions.'
+        '写新技能',
+        'Write a fresh skill',
+        'Improver 读这个工作流自己的失败，给 Solver 一张包含时间范围、决策条件和后续操作的技能卡。',
+        'The improver reads this workflow’s own failures and writes a skill covering the time window, decision rule and follow-up actions.'
       ),
       beat(
-        '带技能重跑',
-        'Rerun with skill',
-        '同一模拟工作流重跑，论文报告的这一个案例通过了全部 11 项检查。',
-        'Rerunning the simulated workflow with the skill passes all 11 checks in this reported case.'
+        '再数一次',
+        'Count again',
+        '带技能重跑，纸上的检查标记逐个变绿。图 9 报告，这一个案例通过了全部 11 项。',
+        'On the rerun, the checks turn green. Figure 9 reports that this case passed all eleven with the skill.'
       ),
       beat(
-        '区分证据',
-        'Read the evidence',
-        '2/11 到 11/11 是个案检查数。上一幕的百分数衡量固定 Solver 时写作者带来的任务成功率差异。',
-        '2/11 to 11/11 counts checks in one case. The previous scene’s percentages compare task success for different writers with a fixed solver.'
+        '看改动',
+        'Locate the edit',
+        '测试时权重已经固定。训练教会模型怎样写技能，在这里真正改变这次执行的是一张新技能卡。',
+        'Weights stay fixed at test time. Training taught the model how to write skills. Here, a newly written skill changes the run.'
       )
     ],
     {
       visual: 'checks',
       ref: citation('S3.F9', '图 9 · 未见工作流个案', 'Figure 9 · held-out case'),
       note: [
-        T('测试时适应', 'Test-time adaptation'),
+        T('例子和总体实验分别说明什么？', 'What do the case and the benchmark tell us?'),
         T(
-          '训练学到提出 harness 的能力。测试时沿用这组权重，适应新工作流靠写技能或工具。论文的完整跨任务结果另见表 1。',
-          'Training learns how to propose harnesses. At test time the weights are fixed and new workflows are addressed through skills or tools. Table 1 reports the broader benchmark results.'
+          '这一幕是图 9 的独立模拟个案。2/11 和 11/11 计的是单个案例通过的检查。上一幕图 5a 的百分数统计多项任务的成功率。表 1 列出完整基准结果。',
+          'This is the separate simulated case in Figure 9. The counts 2/11 and 11/11 are checks passed in one case. Percentages in Figure 5a measure success across tasks. Table 1 reports the benchmark results.'
         )
       ],
       links: [
@@ -302,10 +325,10 @@ const COURSE = {
   edition: T('MedicalRSI 论文导读', 'MedicalRSI paper walkthrough'),
   lessons: clinical,
   groups: [
-    [T('概念引入', 'Concepts'), clinical.slice(0, 3).map((s) => s.id)],
-    [T('论文实验', 'Inside the paper'), clinical.slice(3).map((s) => s.id)]
+    [T('从一道题开始', 'Start with one task'), clinical.slice(0, 3).map((s) => s.id)],
+    [T('走进论文实验', 'Inside the paper'), clinical.slice(3).map((s) => s.id)]
   ],
-  defaults: { solver: 'q-base' },
+  defaults: { solver: 'q-base', window: '', part: '' },
   aliases: {
     medicalrsi: 'training',
     rsi: 'training',

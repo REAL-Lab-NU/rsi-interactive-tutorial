@@ -105,6 +105,21 @@ function snapshot(film, entity, t) {
       .join(' ')
   );
 }
+test('the reader’s prediction leaves the reported glucose query and its correction intact', () => {
+  medical.run("language='en'");
+  const opening = medical.run('COURSE.lessons[0]'),
+    correction = medical.run('COURSE.lessons[2]'),
+    story = medical.run('COURSE.story');
+  assert.equal(story.waitForReader(opening.id, { window: '' }), true);
+  for (const [choice, feedback] of [['day', /fits the question/], ['year', /older readings/]]) {
+    assert.match(story.caption(opening, 0, { window: choice })[1], feedback);
+    assert.equal(story.waitForReader(opening.id, { window: choice }), false);
+    const base = medical.run(`visualFor(COURSE.lessons[0], {window:'${choice}'}, true)`);
+    assert.match(snapshot(base, opening, 3.9), /<g opacity="1"><text[^>]+>Averaged the whole year</);
+  }
+  const improved = medical.run('visualFor(COURSE.lessons[2], COURSE.defaults, true)');
+  assert.match(snapshot(improved, correction, 3.9), /<g opacity="1"><text[^>]+>Average within the window</);
+});
 test('every scene has seekable motion in both languages and orientations', () => {
   for (const edition of [general, medical])
     for (const lang of ['zh', 'en'])

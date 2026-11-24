@@ -48,11 +48,11 @@ function themeButton() {
   const dark = document.documentElement.dataset.theme === 'dark';
   return `<button class="icon-btn" id="theme" aria-label="${dark ? words('切换浅色', 'Light theme') : words('切换深色', 'Dark theme')}">${icon(dark ? 'sun' : 'moon')}</button>`;
 }
-function mast(edition) {
+function mast(edition, brandMark = mark) {
   syncLocale();
   const prefix = edition ? '../' : './';
   const homeURL = prefix + (location.protocol === 'file:' ? 'index.html' : '') + '?lang=' + language;
-  return `<header class="mast"><a class="brand" href="${homeURL}">${mark}RSI Atlas</a>${edition ? `<span class="mast-edition">${esc(l(edition))}</span>` : ''}<div class="mast-tools">${edition ? `<a class="editions-link" href="${homeURL}">${icon('levels')}<span>${words('选择版本', 'Editions')}</span></a>` : ''}<div class="languages" aria-label="${words('语言', 'Language')}">${[
+  return `<header class="mast"><a class="brand" href="${homeURL}">${brandMark}RSI Atlas</a>${edition ? `<span class="mast-edition">${esc(l(edition))}</span>` : ''}<div class="mast-tools">${edition ? `<a class="editions-link" href="${homeURL}">${icon('levels')}<span>${words('选择版本', 'Editions')}</span></a>` : ''}<div class="languages" aria-label="${words('语言', 'Language')}">${[
     ['zh', '中文'],
     ['en', 'EN']
   ]
