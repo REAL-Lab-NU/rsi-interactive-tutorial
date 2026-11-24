@@ -104,6 +104,14 @@ function pickStoryOption(key, value, previous) {
     moveToBeat(partBeats.indexOf(value) + 0.96);
     return;
   }
+  if (dom('drawing').dataset.renderer === 'webgl') {
+    if (key === 'solver') moveToBeat(4);
+    else {
+      activeBeat = -1;
+      seek(0.96);
+    }
+    return;
+  }
   if (key === 'window') {
     session.t = reduced.matches ? 0.96 : 0;
     mountDrawing();
@@ -139,6 +147,9 @@ function pickStoryOption(key, value, previous) {
   }
 }
 COURSE.story = {
+  mount(stage, s, values) {
+    return typeof ClinicStudio === 'undefined' ? null : ClinicStudio.mount(stage, s, values);
+  },
   beatDuration: 5900,
   mark: `<svg class="brand-mark" viewBox="-35 -18 56 39" aria-hidden="true">${markInfinite()}</svg>`,
   chapterIcon(id) {

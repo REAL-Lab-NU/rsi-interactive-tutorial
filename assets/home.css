@@ -60,6 +60,9 @@
   max-height: 202px;
   display: block;
 }
+.edition-card.medical .cover-art {
+  object-fit: cover;
+}
 .cover-art .thumb-head {
   fill: var(--ink);
   font-size: 20px;

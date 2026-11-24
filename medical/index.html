@@ -3,16 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>MedicalRSI 论文导读 · Paper Walkthrough</title>
+    <title>MedicalRSI 3D 论文导读 · Interactive Paper Walkthrough</title>
     <meta
       name="description"
-      content="Follow model–harness co-evolution and the fixed-solver comparisons in the MedicalRSI paper."
+      content="在三维工作台上探索 MedicalRSI。 Open a chart, hand a skill to the solver and follow the reward back to the improver."
     />
-    <meta property="og:title" content="MedicalRSI 论文导读 · Paper Walkthrough" />
+    <meta property="og:title" content="MedicalRSI 3D 论文导读 · Interactive Paper Walkthrough" />
     <meta
       property="og:description"
-      content="Follow model–harness co-evolution and the fixed-solver comparisons in the MedicalRSI paper."
+      content="在三维工作台上探索 MedicalRSI。 Open a chart, hand a skill to the solver and follow the reward back to the improver."
     />
+    <meta property="og:image" content="https://real-lab-nu.github.io/rsi-interactive-tutorial/medical/workbench.webp" />
     <link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../assets/font.css" />
     <script>
@@ -27,6 +28,7 @@
     <link rel="stylesheet" href="../assets/film.css" />
     <link rel="stylesheet" href="../assets/site.css" />
     <link rel="stylesheet" href="storybook.css" />
+    <link rel="stylesheet" href="studio.css" />
   </head>
   <body>
     <a id="skip" class="skip" href="#content">跳到内容 / Skip to content</a>
@@ -61,6 +63,10 @@
     <script src="course.js"></script>
     <script src="illustrations.js"></script>
     <script src="visuals.js"></script>
+    <script data-renderer="3d" src="vendor/three-r187.min.js"></script>
+    <script data-renderer="3d" src="sculptures.js"></script>
+    <script data-renderer="3d" src="experiments.js"></script>
+    <script data-renderer="3d" src="studio.js"></script>
     <script src="storybook.js"></script>
     <script src="../assets/player.js"></script>
   </body>

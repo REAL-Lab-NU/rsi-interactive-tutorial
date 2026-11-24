@@ -26,8 +26,8 @@ const clinical = [
       beat(
         '算平均',
         'Take the average',
-        '看粉色括线。论文里的 Solver 把这一整段都拿去算平均，漏了筛选时间这一步。',
-        'Follow the pink bracket. The solver in the paper averaged the whole stretch of records, skipping the time filter.'
+        '题目要的是一天，Solver 却把整年的记录都拿去算平均。查询工具查到了数据，接下来漏了一步筛选。',
+        'The tool found the records. The solver averaged the entire year and skipped the filter that would have kept only the last day.'
       ),
       beat(
         '找原因',
@@ -53,8 +53,8 @@ const clinical = [
       note: [
         T('一次失败怎样读？', 'What happened in this attempt?'),
         T(
-          '图 13 讲的是模拟工作流。作者报告，Solver 单独运行时取了一年的血糖记录求平均。要求是最近 24 小时。动画里的圆点和间距仅示意时间范围。你的选择标记在便签上，病历里的括线还原论文报告的运行。',
-          'Figure 13 describes a simulated workflow. The solver acting alone averaged a year of glucose records when the task required the last 24 hours. Dots and spacing illustrate the time ranges. The sticky note records your choice. The bracket shows what the paper’s solver actually did.'
+          '图 13 讲的是模拟工作流。作者报告，Solver 单独运行时取了一年的血糖记录求平均。题目要求最近 24 小时。你可以先选一个时间窗，再打开病历看论文报告的运行。图中的记录仅示意时间范围。',
+          'Figure 13 describes a simulated workflow. The solver acting alone averaged a year of glucose records when the task required the last 24 hours. You can choose a window before opening the chart to inspect the reported run. The illustrated records represent time ranges.'
         )
       ]
     }
@@ -141,8 +141,8 @@ const clinical = [
       beat(
         '重跑',
         'Try it again',
-        '蓝帽子用这张卡重跑查询。看绿色括线，较早的记录退出了计算。',
-        'The blue cap reruns the query with the card. Follow the green bracket as the older observations drop out of the calculation.'
+        '蓝帽子用这张卡重新查询。较早的记录退出了计算，留下的是最近 24 小时的值。',
+        'The blue cap reruns the query with the card. Older observations drop out, leaving only values from the last 24 hours.'
       ),
       beat(
         '带到下次',
@@ -214,8 +214,8 @@ const clinical = [
     T('固定 Solver 做对照', 'Keep the solver fixed'),
     T('怎么单独检验写作者的进步？', 'How can we test the writer’s contribution?'),
     T(
-      '选定一位 Solver，把它固定下来。每一行都是同一个 Solver，上场的 harness 写作者可以换。',
-      'Choose a solver and hold it fixed. All three rows use that solver. You can now compare the contributions of different harness writers.'
+      '选定一位 Solver，把它固定下来。三根柱子用了同一个 Solver，可以比较不同写作者提供的 harness。',
+      'Choose a solver and hold it fixed. All three bars use that solver, so you can compare what different harness writers contributed.'
     ),
     [
       beat(
@@ -227,8 +227,8 @@ const clinical = [
       beat(
         '看起点',
         'Read the baseline',
-        '先读第一行。它给出只用基础条件时，这个 Solver 做对任务的比例。',
-        'Read the first row. It gives the share of tasks solved with the base condition alone.'
+        '先读 H₀。它给出只用基础条件时，这个 Solver 做对任务的比例。',
+        'Start with H₀. It gives the share of tasks solved with the base harness alone.'
       ),
       beat(
         '换写作者',
@@ -239,8 +239,8 @@ const clinical = [
       beat(
         '比差值',
         'Read the gain',
-        '粉色便签给出两位写作者相差的百分点。换一个 Solver，还可以检验这个比较是否仍然成立。',
-        'The pink slip shows the difference between writers in percentage points. Try another solver with the selector.'
+        '读两位写作者相差的百分点。换一个固定 Solver，看看这项比较是否仍然成立。',
+        'Read the gap between writers in percentage points. Change the fixed solver and check whether the comparison still holds.'
       )
     ],
     {
@@ -261,10 +261,10 @@ const clinical = [
         }
       ],
       note: [
-        T('怎样读柱子和便签？', 'How do the bars and slip relate?'),
+        T('怎样读成功率和差值？', 'How do the success rates and gains relate?'),
         T(
-          '三行使用相同骨干和 Solver 训练状态。后两行比较 GRPO 写作者和 MedicalRSI 写作者给出的 harness。论文柱上的成功率取整，便签沿用论文标出的更高精度差值，单位是百分点。实验支持这些模拟工作流和受测模型上的比较。',
-          'The three rows share a backbone and solver training state. The last two compare harnesses from the GRPO and MedicalRSI writers. Bar labels use the rounded success rates in the paper. The slip uses the paper’s higher-precision difference in percentage points. These comparisons apply to the tested models and simulated workflows.'
+          '三根柱子使用相同的骨干和 Solver 训练状态。后两根比较 GRPO 写作者和 MedicalRSI 写作者提供的 harness。成功率沿用论文柱上的整数，百分点差值沿用论文标出的更高精度数值。这些比较来自受测模型和模拟工作流。',
+          'The bars share a backbone and solver training state. The last two compare harnesses from the GRPO and MedicalRSI writers. Success rates use the rounded bar labels in the paper. Percentage-point gains use the paper’s higher-precision annotations. The comparisons cover the tested models and simulated workflows.'
         )
       ]
     }

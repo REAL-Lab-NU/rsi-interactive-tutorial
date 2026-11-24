@@ -156,7 +156,7 @@ function closePanel(resume = true) {
 }
 function render(focus = false, animation = false) {
   const s = read(session.id);
-  const previous = story && animation && !reduced.matches ? dom('drawing')?.firstElementChild : null;
+  const previous = story && animation && !reduced.matches ? dom('drawing')?.querySelector('svg.story-film') : null;
   dom('mast').innerHTML = mast(COURSE.edition, story?.mark);
   dom('rail').innerHTML = railway();
   const rail = dom('rail').querySelector('.rail'),
@@ -184,10 +184,14 @@ function mountDrawing() {
   const s = read(session.id);
   if (!s) return;
   if (story) story.finishMotion();
-  const film = visualFor(s, choices, compact.matches),
-    stage = dom('drawing');
-  stage.innerHTML = film.svg(s.paper || s);
-  draw = bindFilm(stage.firstElementChild, film);
+  const stage = dom('drawing');
+  draw = story?.mount?.(stage, s, choices);
+  if (!draw) {
+    stage.removeAttribute('data-renderer');
+    const film = visualFor(s, choices, compact.matches);
+    stage.innerHTML = film.svg(s.paper || s);
+    draw = bindFilm(stage.firstElementChild, film);
+  }
   activeBeat = -1;
   paint();
   updatePlay();
